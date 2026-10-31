@@ -1,0 +1,106 @@
+{
+  "seq": 28,
+  "run_id": "f6187797",
+  "step": "accept-small",
+  "label": "dispute-accept-ear_tips-with-refund",
+  "attempt": 1,
+  "idempotent": true,
+  "recorded_at": "2026-10-30T20:51:24+00:00",
+  "meta": {
+    "kind": "accept",
+    "case": "ear_tips",
+    "stage_before": "RFI",
+    "variant": "with-refund",
+    "guesses": [
+      "ACCEPT_REASON_LOW_VALUE",
+      "RFI_ACCEPT_REFUND"
+    ]
+  },
+  "request": {
+    "method": "POST",
+    "url": "https://api.sandbox.airwallex.com/api/v1/pa/payment_disputes/dst_sgpvfc6s8hnpdljxs0s/accept",
+    "headers": {
+      "host": "api.sandbox.airwallex.com",
+      "accept-encoding": "gzip, deflate",
+      "connection": "keep-alive",
+      "accept": "application/json",
+      "user-agent": "disputable-spike/0.2",
+      "authorization": "<redacted>",
+      "content-length": "269",
+      "content-type": "application/json"
+    },
+    "body": {
+      "request_id": "cc6f2460-0afc-4d76-a9bc-7ca8f0d5382e",
+      "reason": "LOW_VALUE_TRANSACTION",
+      "accepted_by": "disputable-spike",
+      "description": "USD 12 at risk is below the USD 15 chargeback fee; delivery scan is unsigned.",
+      "refund": {
+        "amount": 12,
+        "reason": "REQUESTED_BY_CUSTOMER"
+      }
+    }
+  },
+  "response": {
+    "status": 200,
+    "elapsed_ms": 514,
+    "headers": {
+      "content-type": "application/json",
+      "content-length": "1058",
+      "server-timing": "traceparent;desc=\"00-29f5d8762f3a485abac18265ab07a408-3c469bb6d71bda09-01\", traceparent;desc=\"00-29f5d8762f3a485abac18265ab07a408-ee1d26f006611bb1-01\"",
+      "access-control-expose-headers": "Server-Timing,Server-Timing",
+      "date": "Fri, 30 Oct 2026 20:51:45 GMT",
+      "x-envoy-upstream-service-time": "187",
+      "via": "1.1 google, 1.1 google",
+      "server": "APISIX",
+      "x-b3-traceid": "29f5d8762f3a485abac18265ab07a408",
+      "strict-transport-security": "max-age=15552000",
+      "alt-svc": "h3=\":443\"; ma=2592000"
+    },
+    "json": {
+      "id": "dst_sgpvfc6s8hnpdljxs0s",
+      "stage": "RFI",
+      "status": "ACCEPTED",
+      "mode": "COLLABORATION",
+      "issuer_comment": "Cardholder says the ear tips never arrived.",
+      "issuer_documents": [],
+      "amount": 12,
+      "currency": "USD",
+      "merchant_order_id": "FH-1121-f6187797-1b94",
+      "payment_intent_id": "int_sgpvzhfh9hnpdkrj23r",
+      "payment_attempt_id": "att_sgpvzhfh9hnpdkzghkm_krj23r",
+      "acquirer_reference_number": "",
+      "refunds": [
+        {
+          "id": "rfd_sgpvb7qw4hnpdlp670a_krj23r"
+        }
+      ],
+      "payment_method_type": "VISA",
+      "card_brand": "visa",
+      "reason": {
+        "original_code": "13.1",
+        "description": "Merchandise/ Services Not Received",
+        "type": "PRODUCT_NOT_RECEIVED"
+      },
+      "accept_details": [
+        {
+          "stage": "RFI",
+          "reason": "LOW_VALUE_TRANSACTION",
+          "description": "USD 12 at risk is below the USD 15 chargeback fee; delivery scan is unsigned.",
+          "refund": {
+            "amount": 12,
+            "reason": "REQUESTED_BY_CUSTOMER"
+          },
+          "accepted_by": "disputable-spike",
+          "accepted_at": "2026-10-30T20:51:45+00:00"
+        }
+      ],
+      "challenge_details": [],
+      "due_at": "2026-11-13T20:51:14+00:00",
+      "created_at": "2026-10-30T20:51:36+00:00",
+      "updated_at": "2026-10-30T20:51:45+00:00",
+      "transaction_type": "PAYMENT"
+    },
+    "text": null,
+    "transport_error": null
+  }
+}

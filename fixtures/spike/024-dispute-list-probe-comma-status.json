@@ -1,0 +1,57 @@
+{
+  "seq": 24,
+  "run_id": "f6187797",
+  "step": "read",
+  "label": "dispute-list-probe-comma-status",
+  "attempt": 1,
+  "idempotent": true,
+  "recorded_at": "2026-10-30T20:51:22+00:00",
+  "meta": {
+    "kind": "dispute_list",
+    "case": null,
+    "probe": "comma_separated_status",
+    "params": {
+      "status": "REQUIRES_RESPONSE,CHALLENGED",
+      "size": 100
+    }
+  },
+  "request": {
+    "method": "GET",
+    "url": "https://api.sandbox.airwallex.com/api/v1/pa/payment_disputes?status=REQUIRES_RESPONSE%2CCHALLENGED&size=100",
+    "headers": {
+      "host": "api.sandbox.airwallex.com",
+      "accept-encoding": "gzip, deflate",
+      "connection": "keep-alive",
+      "accept": "application/json",
+      "user-agent": "disputable-spike/0.2",
+      "authorization": "<redacted>"
+    },
+    "body": null
+  },
+  "response": {
+    "status": 400,
+    "elapsed_ms": 335,
+    "headers": {
+      "content-type": "application/json",
+      "content-length": "263",
+      "server-timing": "traceparent;desc=\"00-cb85858a79b640b99cce5cef1bd45a2b-1477938227e17c95-01\", traceparent;desc=\"00-cb85858a79b640b99cce5cef1bd45a2b-98f1ef6d85434003-01\"",
+      "access-control-expose-headers": "Server-Timing,Server-Timing",
+      "date": "Fri, 30 Oct 2026 20:51:43 GMT",
+      "x-envoy-upstream-service-time": "16",
+      "via": "1.1 google, 1.1 google",
+      "server": "APISIX",
+      "x-b3-traceid": "cb85858a79b640b99cce5cef1bd45a2b",
+      "strict-transport-security": "max-age=15552000",
+      "alt-svc": "h3=\":443\"; ma=2592000"
+    },
+    "json": {
+      "code": "validation_error",
+      "source": "status",
+      "message": "status should be one of `REQUIRES_RESPONSE`, `EXPIRED`, `CHALLENGED`, `ACCEPTED`, `REVERSED`, `PENDING_CLOSURE`, `PENDING_DECISION`, `WON`, `LOST`",
+      "trace_id": "cb85858a79b640b99cce5cef1bd45a2b",
+      "details": {}
+    },
+    "text": null,
+    "transport_error": null
+  }
+}

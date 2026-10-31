@@ -1,0 +1,48 @@
+{
+  "seq": 26,
+  "run_id": "f6187797",
+  "step": "read",
+  "label": "dispute-related-pis-headphones",
+  "attempt": 1,
+  "idempotent": true,
+  "recorded_at": "2026-10-30T20:51:23+00:00",
+  "meta": {
+    "kind": "related",
+    "case": "headphones"
+  },
+  "request": {
+    "method": "GET",
+    "url": "https://api.sandbox.airwallex.com/api/v1/pa/payment_disputes/dst_sgpvfc6s8hnpdllyz1y/related_payment_intents?page_size=100",
+    "headers": {
+      "host": "api.sandbox.airwallex.com",
+      "accept-encoding": "gzip, deflate",
+      "connection": "keep-alive",
+      "accept": "application/json",
+      "user-agent": "disputable-spike/0.2",
+      "authorization": "<redacted>"
+    },
+    "body": null
+  },
+  "response": {
+    "status": 200,
+    "elapsed_ms": 627,
+    "headers": {
+      "content-type": "application/json",
+      "content-length": "12",
+      "server-timing": "traceparent;desc=\"00-fd60a0f234d040dda102cb5a5ed5c21b-acb6aeaa7f1bf3db-01\", traceparent;desc=\"00-fd60a0f234d040dda102cb5a5ed5c21b-9c3cec02673728ec-01\"",
+      "access-control-expose-headers": "Server-Timing,Server-Timing",
+      "date": "Fri, 30 Oct 2026 20:51:44 GMT",
+      "x-envoy-upstream-service-time": "327",
+      "via": "1.1 google, 1.1 google",
+      "server": "APISIX",
+      "x-b3-traceid": "fd60a0f234d040dda102cb5a5ed5c21b",
+      "strict-transport-security": "max-age=15552000",
+      "alt-svc": "h3=\":443\"; ma=2592000"
+    },
+    "json": {
+      "items": []
+    },
+    "text": null,
+    "transport_error": null
+  }
+}

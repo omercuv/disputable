@@ -1,0 +1,66 @@
+{
+  "seq": 52,
+  "run_id": "f6187797",
+  "step": "refunds",
+  "label": "refunds-all",
+  "attempt": 1,
+  "idempotent": true,
+  "recorded_at": "2026-10-30T20:51:39+00:00",
+  "meta": {
+    "kind": "refunds_list",
+    "case": null,
+    "phase": "all"
+  },
+  "request": {
+    "method": "GET",
+    "url": "https://api.sandbox.airwallex.com/api/v1/pa/refunds?page_num=0&page_size=100",
+    "headers": {
+      "host": "api.sandbox.airwallex.com",
+      "accept-encoding": "gzip, deflate",
+      "connection": "keep-alive",
+      "accept": "application/json",
+      "user-agent": "disputable-spike/0.2",
+      "authorization": "<redacted>",
+      "cookie": "<redacted>"
+    },
+    "body": null
+  },
+  "response": {
+    "status": 200,
+    "elapsed_ms": 346,
+    "headers": {
+      "content-type": "application/json",
+      "content-length": "442",
+      "server-timing": "traceparent;desc=\"00-a387fdb3de994435942f48427d19aa44-70923ed855329367-01\", traceparent;desc=\"00-a387fdb3de994435942f48427d19aa44-621c626270eb3209-01\"",
+      "access-control-expose-headers": "Server-Timing,Server-Timing",
+      "date": "Fri, 30 Oct 2026 20:52:00 GMT",
+      "x-envoy-upstream-service-time": "22",
+      "via": "1.1 google, 1.1 google",
+      "server": "APISIX",
+      "x-b3-traceid": "a387fdb3de994435942f48427d19aa44",
+      "strict-transport-security": "max-age=15552000",
+      "alt-svc": "h3=\":443\"; ma=2592000"
+    },
+    "json": {
+      "has_more": false,
+      "items": [
+        {
+          "id": "rfd_sgpvb7qw4hnpdlp670a_krj23r",
+          "request_id": "3ec7f5d8-7e3f-4469-ba3e-1e9bc5ce901a",
+          "payment_intent_id": "int_sgpvzhfh9hnpdkrj23r",
+          "payment_attempt_id": "att_sgpvzhfh9hnpdkzghkm_krj23r",
+          "amount": 12,
+          "currency": "USD",
+          "reason": "REQUESTED_BY_CUSTOMER",
+          "metadata": {},
+          "status": "ACCEPTED",
+          "created_at": "2026-10-30T20:51:45+00:00",
+          "updated_at": "2026-10-30T20:51:46+00:00",
+          "merchant_order_id": "FH-1121-f6187797-1b94"
+        }
+      ]
+    },
+    "text": null,
+    "transport_error": null
+  }
+}

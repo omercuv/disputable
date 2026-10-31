@@ -1,0 +1,54 @@
+{
+  "seq": 1,
+  "run_id": "f6187797",
+  "step": "login",
+  "label": "login",
+  "attempt": 1,
+  "idempotent": true,
+  "recorded_at": "2026-10-30T20:50:27+00:00",
+  "meta": {
+    "kind": "login"
+  },
+  "request": {
+    "method": "POST",
+    "url": "https://api.sandbox.airwallex.com/api/v1/authentication/login",
+    "headers": {
+      "host": "api.sandbox.airwallex.com",
+      "content-length": "0",
+      "accept-encoding": "gzip, deflate",
+      "connection": "keep-alive",
+      "accept": "application/json",
+      "user-agent": "disputable-spike/0.2",
+      "x-client-id": "<redacted>",
+      "x-api-key": "<redacted>"
+    },
+    "body": null
+  },
+  "response": {
+    "status": 201,
+    "elapsed_ms": 806,
+    "headers": {
+      "content-type": "application/json",
+      "content-length": "1844",
+      "server-timing": "traceparent;desc=\"00-4e183d7bce3944d2948979c616ac328d-abd9ff2da596fe24-01\"",
+      "access-control-expose-headers": "*",
+      "date": "Fri, 30 Oct 2026 20:50:47 GMT",
+      "x-envoy-upstream-service-time": "137",
+      "via": "1.1 google, 1.1 google",
+      "server": "APISIX",
+      "x-b3-traceid": "4e183d7bce3944d2948979c616ac328d",
+      "strict-transport-security": "max-age=15552000",
+      "access-control-allow-origin": "*",
+      "access-control-allow-methods": "PUT,PATCH,DELETE,GET,OPTIONS,POST",
+      "access-control-max-age": "5",
+      "access-control-allow-headers": "*",
+      "alt-svc": "h3=\":443\"; ma=2592000"
+    },
+    "json": {
+      "expires_at": "2026-10-30T21:20:48+0000",
+      "token": "<redacted>"
+    },
+    "text": null,
+    "transport_error": null
+  }
+}

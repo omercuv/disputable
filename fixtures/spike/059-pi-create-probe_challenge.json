@@ -1,0 +1,82 @@
+{
+  "seq": 59,
+  "run_id": "f6187797",
+  "step": "probe",
+  "label": "pi-create-probe_challenge",
+  "attempt": 1,
+  "idempotent": true,
+  "recorded_at": "2026-10-30T20:52:08+00:00",
+  "meta": {
+    "kind": "pi_create",
+    "case": "probe_challenge"
+  },
+  "request": {
+    "method": "POST",
+    "url": "https://api.sandbox.airwallex.com/api/v1/pa/payment_intents/create",
+    "headers": {
+      "host": "api.sandbox.airwallex.com",
+      "accept-encoding": "gzip, deflate",
+      "connection": "keep-alive",
+      "accept": "application/json",
+      "user-agent": "disputable-spike/0.2",
+      "authorization": "<redacted>",
+      "cookie": "<redacted>",
+      "content-length": "286",
+      "content-type": "application/json"
+    },
+    "body": {
+      "request_id": "79c870b6-7953-4202-aac3-a099b89d00b3",
+      "amount": 25,
+      "currency": "USD",
+      "merchant_order_id": "FH-9002-f6187797-f88e",
+      "descriptor": "FERNHILL AUDIO",
+      "return_url": "https://example.com/checkout/return",
+      "metadata": {
+        "spike_run": "f6187797",
+        "case": "probe_challenge",
+        "order_no": "9002"
+      }
+    }
+  },
+  "response": {
+    "status": 201,
+    "elapsed_ms": 354,
+    "headers": {
+      "content-type": "application/json",
+      "content-length": "958",
+      "server-timing": "traceparent;desc=\"00-f6e0ec257f1c40cbb5169a655e2431b6-c464d8779a352315-01\", traceparent;desc=\"00-f6e0ec257f1c40cbb5169a655e2431b6-5a3fb6065be2c536-01\"",
+      "access-control-expose-headers": "Server-Timing,Server-Timing",
+      "date": "Fri, 30 Oct 2026 20:52:29 GMT",
+      "x-envoy-upstream-service-time": "29",
+      "via": "1.1 google, 1.1 google",
+      "server": "APISIX",
+      "x-b3-traceid": "f6e0ec257f1c40cbb5169a655e2431b6",
+      "strict-transport-security": "max-age=15552000",
+      "alt-svc": "h3=\":443\"; ma=2592000"
+    },
+    "json": {
+      "id": "int_sgpvzhfh9hnpdmfh8le",
+      "request_id": "79c870b6-7953-4202-aac3-a099b89d00b3",
+      "amount": 25,
+      "currency": "USD",
+      "merchant_order_id": "FH-9002-f6187797-f88e",
+      "descriptor": "Sandbox Business",
+      "metadata": {
+        "case": "probe_challenge",
+        "order_no": "9002",
+        "spike_run": "f6187797"
+      },
+      "status": "REQUIRES_PAYMENT_METHOD",
+      "captured_amount": 0,
+      "created_at": "2026-10-30T20:52:29+00:00",
+      "updated_at": "2026-10-30T20:52:29+00:00",
+      "client_secret": "<redacted>",
+      "return_url": "https://example.com/checkout/return",
+      "mor_enabled": false,
+      "original_amount": 25,
+      "original_currency": "USD"
+    },
+    "text": null,
+    "transport_error": null
+  }
+}

@@ -1,0 +1,144 @@
+{
+  "seq": 36,
+  "run_id": "f6187797",
+  "step": "escalate",
+  "label": "sim-dispute-escalate-headphones-due_at",
+  "attempt": 1,
+  "idempotent": false,
+  "recorded_at": "2026-10-30T20:51:30+00:00",
+  "meta": {
+    "kind": "sim_escalate",
+    "case": "headphones",
+    "marker": "TC40",
+    "stage_before": "RFI",
+    "status_before": "CHALLENGED",
+    "variant": "due_at",
+    "guesses": [
+      "ESCALATE_DUE_FIELD",
+      "DUE_AT_FORMAT"
+    ]
+  },
+  "request": {
+    "method": "POST",
+    "url": "https://api.sandbox.airwallex.com/api/v1/simulation/pa/payment_disputes/dst_sgpvfc6s8hnpdllyz1y/escalate",
+    "headers": {
+      "host": "api.sandbox.airwallex.com",
+      "accept-encoding": "gzip, deflate",
+      "connection": "keep-alive",
+      "accept": "application/json",
+      "user-agent": "disputable-spike/0.2",
+      "authorization": "<redacted>",
+      "cookie": "<redacted>",
+      "content-length": "118",
+      "content-type": "application/json"
+    },
+    "body": {
+      "due_at": "2026-11-13T20:51:30+0000",
+      "comment": "Order #1038 has a Visa fraud report (TC40) from May; CE 3.0 not met."
+    }
+  },
+  "response": {
+    "status": 200,
+    "elapsed_ms": 456,
+    "headers": {
+      "content-type": "application/json",
+      "date": "Fri, 30 Oct 2026 20:51:51 GMT",
+      "x-envoy-upstream-service-time": "124",
+      "via": "1.1 google, 1.1 google",
+      "server": "APISIX",
+      "x-b3-traceid": "bc7cce62735849a98e627d7d5defcd7d",
+      "strict-transport-security": "max-age=15552000",
+      "alt-svc": "h3=\":443\"; ma=2592000",
+      "transfer-encoding": "chunked"
+    },
+    "json": {
+      "id": "dst_sgpvfc6s8hnpdllyz1y",
+      "stage": "CHARGEBACK",
+      "status": "REQUIRES_RESPONSE",
+      "mode": "ALLOCATION",
+      "issuer_comment": "Order #1038 has a Visa fraud report (TC40) from May; CE 3.0 not met.",
+      "issuer_documents": [],
+      "amount": 1249,
+      "currency": "USD",
+      "merchant_order_id": "FH-1109-f6187797-281f",
+      "payment_intent_id": "int_sgpvb7qw4hnpdl9vi5b",
+      "payment_attempt_id": "att_sgpvb7qw4hnpdlhxfng_l9vi5b",
+      "acquirer_reference_number": "",
+      "payment_method_type": "VISA",
+      "card_brand": "visa",
+      "reason": {
+        "original_code": "10.4",
+        "description": "Other Fraud-Card Absent Environment",
+        "type": "FRAUDULENT"
+      },
+      "accept_details": [],
+      "challenge_details": [
+        {
+          "stage": "RFI",
+          "customer_info": {},
+          "seller_info": {
+            "name": "Fernhill Audio Ltd",
+            "store_name": "Fernhill Audio",
+            "store_physical_address": "1 Demo Street, San Francisco, CA 94103, US",
+            "store_url": "https://example.com/fernhill-audio"
+          },
+          "delivery_info": {
+            "delivered_at": "2026-10-30T20:51:25.000+00:00",
+            "name": "Alex Sample",
+            "address": "2 Sample Street, San Francisco, CA 94103, US",
+            "shipping_company": "ups",
+            "tracking_number": "1Z999AA10123456784",
+            "status": "DELIVERED"
+          },
+          "order_info": {
+            "id": "FH-1109-f6187797-281f",
+            "invoice_number": "INV-1109",
+            "total_amount": 1249,
+            "total_currency": "USD",
+            "products": [
+              {
+                "name": "Over-ear studio headphones",
+                "unit_price": 1249,
+                "currency": "",
+                "quantity": 1
+              }
+            ],
+            "created_at": "2026-10-30T20:51:19.000+00:00"
+          },
+          "supporting_documents": {
+            "generated_files": [
+              "MDAwMDAwMDAtMDAwMC00MDAwLTgwMDAtMDAwMDAwMDAwMDAwLHwsc2csfCxFdmlkZW5jZV9Qcm92aWRlZF9Gb3JtNjE5OTAxNDQyNDg0Mzc3MTE5NS5wZGZfMTc5MzM5MzUwOTYyNg"
+            ],
+            "other_documents": [
+              "MDAwMDAwMDAtMDAwMC00MDAwLTgwMDAtMDAwMDAwMDAwMDAwLHwsc2csfCxldmlkZW5jZV8xX2Y2MTg3Nzk3X2FlODgucGRmXzE3OTMzOTM1MDcwOTI"
+            ],
+            "documents": [
+              {
+                "type": "PRIMARY",
+                "file_ids": [
+                  "MDAwMDAwMDAtMDAwMC00MDAwLTgwMDAtMDAwMDAwMDAwMDAwLHwsc2csfCxldmlkZW5jZV8xX2Y2MTg3Nzk3X2FlODgucGRmXzE3OTMzOTM1MDcwOTI"
+                ],
+                "description": "Orders #1012, #1038, #1077: same card, device ID and IP, never disputed"
+              },
+              {
+                "type": "OTHER",
+                "file_ids": [
+                  "MDAwMDAwMDAtMDAwMC00MDAwLTgwMDAtMDAwMDAwMDAwMDAwLHwsc2csfCxldmlkZW5jZV8xX2Y2MTg3Nzk3X2FlODgucGRmXzE3OTMzOTM1MDcwOTI"
+                ]
+              }
+            ]
+          },
+          "challenged_by": "disputable-spike",
+          "challenged_at": "2026-10-30T20:51:50.280+00:00",
+          "reason": "OTHER_REASONS"
+        }
+      ],
+      "due_at": "2026-11-13T20:51:30.000+00:00",
+      "created_at": "2026-10-30T20:51:40.128+00:00",
+      "updated_at": "2026-10-30T20:51:51.551+00:00",
+      "transaction_type": "PAYMENT"
+    },
+    "text": null,
+    "transport_error": null
+  }
+}

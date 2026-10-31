@@ -1,0 +1,81 @@
+{
+  "seq": 2,
+  "run_id": "f6187797",
+  "step": "payments",
+  "label": "pi-create-ear_tips",
+  "attempt": 1,
+  "idempotent": true,
+  "recorded_at": "2026-10-30T20:50:27+00:00",
+  "meta": {
+    "kind": "pi_create",
+    "case": "ear_tips"
+  },
+  "request": {
+    "method": "POST",
+    "url": "https://api.sandbox.airwallex.com/api/v1/pa/payment_intents/create",
+    "headers": {
+      "host": "api.sandbox.airwallex.com",
+      "accept-encoding": "gzip, deflate",
+      "connection": "keep-alive",
+      "accept": "application/json",
+      "user-agent": "disputable-spike/0.2",
+      "authorization": "<redacted>",
+      "content-length": "279",
+      "content-type": "application/json"
+    },
+    "body": {
+      "request_id": "69b03eec-1c82-4e0a-81e1-82b6063b5a96",
+      "amount": 12,
+      "currency": "USD",
+      "merchant_order_id": "FH-1121-f6187797-1b94",
+      "descriptor": "FERNHILL AUDIO",
+      "return_url": "https://example.com/checkout/return",
+      "metadata": {
+        "spike_run": "f6187797",
+        "case": "ear_tips",
+        "order_no": "1121"
+      }
+    }
+  },
+  "response": {
+    "status": 201,
+    "elapsed_ms": 349,
+    "headers": {
+      "content-type": "application/json",
+      "content-length": "951",
+      "server-timing": "traceparent;desc=\"00-ef8b4db05beb4a6e874844710c8148c7-bcbf3b0e99f5ea3e-01\", traceparent;desc=\"00-ef8b4db05beb4a6e874844710c8148c7-e814ddb23e294fab-01\"",
+      "access-control-expose-headers": "Server-Timing,Server-Timing",
+      "date": "Fri, 30 Oct 2026 20:50:49 GMT",
+      "x-envoy-upstream-service-time": "32",
+      "via": "1.1 google, 1.1 google",
+      "server": "APISIX",
+      "x-b3-traceid": "ef8b4db05beb4a6e874844710c8148c7",
+      "strict-transport-security": "max-age=15552000",
+      "alt-svc": "h3=\":443\"; ma=2592000"
+    },
+    "json": {
+      "id": "int_sgpvzhfh9hnpdkrj23r",
+      "request_id": "69b03eec-1c82-4e0a-81e1-82b6063b5a96",
+      "amount": 12,
+      "currency": "USD",
+      "merchant_order_id": "FH-1121-f6187797-1b94",
+      "descriptor": "Sandbox Business",
+      "metadata": {
+        "case": "ear_tips",
+        "order_no": "1121",
+        "spike_run": "f6187797"
+      },
+      "status": "REQUIRES_PAYMENT_METHOD",
+      "captured_amount": 0,
+      "created_at": "2026-10-30T20:50:49+00:00",
+      "updated_at": "2026-10-30T20:50:49+00:00",
+      "client_secret": "<redacted>",
+      "return_url": "https://example.com/checkout/return",
+      "mor_enabled": false,
+      "original_amount": 12,
+      "original_currency": "USD"
+    },
+    "text": null,
+    "transport_error": null
+  }
+}

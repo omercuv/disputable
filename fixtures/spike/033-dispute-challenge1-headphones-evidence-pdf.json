@@ -1,0 +1,200 @@
+{
+  "seq": 33,
+  "run_id": "f6187797",
+  "step": "challenge-1",
+  "label": "dispute-challenge1-headphones-evidence-pdf",
+  "attempt": 1,
+  "idempotent": true,
+  "recorded_at": "2026-10-30T20:51:29+00:00",
+  "meta": {
+    "kind": "challenge",
+    "case": "headphones",
+    "round": 1,
+    "stage_before": "RFI",
+    "variant": "evidence-pdf",
+    "guesses": [
+      "CHALLENGE_1_REASON",
+      "CHALLENGE_METHOD",
+      "CHALLENGE_DOC_TYPE",
+      "RFI_CHALLENGE_EXTRAS",
+      "SHIPPING_COMPANY",
+      "DELIVERY_STATUS",
+      "SEND_EVIDENCE_OBJECT_ON_STANDARD",
+      "CHALLENGE_1_EVIDENCE_FIELD"
+    ]
+  },
+  "request": {
+    "method": "POST",
+    "url": "https://api.sandbox.airwallex.com/api/v1/pa/payment_disputes/dst_sgpvfc6s8hnpdllyz1y/challenge",
+    "headers": {
+      "host": "api.sandbox.airwallex.com",
+      "accept-encoding": "gzip, deflate",
+      "connection": "keep-alive",
+      "accept": "application/json",
+      "user-agent": "disputable-spike/0.2",
+      "authorization": "<redacted>",
+      "cookie": "<redacted>",
+      "content-length": "1337",
+      "content-type": "application/json"
+    },
+    "body": {
+      "request_id": "4461db2d-5d45-440a-a7d0-3677f8fbdeb1",
+      "reason": "PURCHASE_HISTORY",
+      "challenge_method": "STANDARD",
+      "challenged_by": "disputable-spike",
+      "order_info": {
+        "id": "FH-1109-f6187797-281f",
+        "invoice_number": "INV-1109",
+        "created_at": "2026-10-30T20:51:19+00:00",
+        "total_amount": 1249,
+        "total_currency": "USD",
+        "products": [
+          {
+            "name": "Over-ear studio headphones",
+            "sku": "FH-HP-03",
+            "quantity": 1,
+            "unit_price": 1249,
+            "type": "physical_good"
+          }
+        ]
+      },
+      "seller_info": {
+        "name": "Fernhill Audio Ltd",
+        "store_name": "Fernhill Audio",
+        "store_url": "https://example.com/fernhill-audio",
+        "store_physical_address": "1 Demo Street, San Francisco, CA 94103, US"
+      },
+      "delivery_info": {
+        "name": "Alex Sample",
+        "address": "2 Sample Street, San Francisco, CA 94103, US",
+        "shipping_company": "ups",
+        "tracking_number": "1Z999AA10123456784",
+        "shipped_at": "2026-10-30T20:51:24+00:00",
+        "delivered_at": "2026-10-30T20:51:25+00:00",
+        "status": "DELIVERED"
+      },
+      "supporting_documents": {
+        "documents": [
+          {
+            "type": "PRIMARY",
+            "file_ids": [
+              "MDAwMDAwMDAtMDAwMC00MDAwLTgwMDAtMDAwMDAwMDAwMDAwLHwsc2csfCxldmlkZW5jZV8xX2Y2MTg3Nzk3X2FlODgucGRmXzE3OTMzOTM1MDcwOTI"
+            ],
+            "description": "Orders #1012, #1038, #1077: same card, device ID and IP, never disputed"
+          }
+        ]
+      },
+      "evidence": {
+        "previous_purchase_similar_product_file_ids": [
+          "MDAwMDAwMDAtMDAwMC00MDAwLTgwMDAtMDAwMDAwMDAwMDAwLHwsc2csfCxldmlkZW5jZV8xX2Y2MTg3Nzk3X2FlODgucGRmXzE3OTMzOTM1MDcwOTI"
+        ]
+      }
+    }
+  },
+  "response": {
+    "status": 200,
+    "elapsed_ms": 2569,
+    "headers": {
+      "content-type": "application/json",
+      "content-length": "2275",
+      "server-timing": "traceparent;desc=\"00-ad7f6407509f4a98bd9a4264ace47d0f-ae17df0415d69890-01\", traceparent;desc=\"00-ad7f6407509f4a98bd9a4264ace47d0f-88466ef87ea23fbb-01\"",
+      "access-control-expose-headers": "Server-Timing,Server-Timing",
+      "date": "Fri, 30 Oct 2026 20:51:50 GMT",
+      "x-envoy-upstream-service-time": "2250",
+      "via": "1.1 google, 1.1 google",
+      "server": "APISIX",
+      "x-b3-traceid": "ad7f6407509f4a98bd9a4264ace47d0f",
+      "strict-transport-security": "max-age=15552000",
+      "alt-svc": "h3=\":443\"; ma=2592000"
+    },
+    "json": {
+      "id": "dst_sgpvfc6s8hnpdllyz1y",
+      "stage": "RFI",
+      "status": "CHALLENGED",
+      "mode": "ALLOCATION",
+      "issuer_comment": "Cardholder does not recognise this card-absent transaction.",
+      "issuer_documents": [],
+      "amount": 1249,
+      "currency": "USD",
+      "merchant_order_id": "FH-1109-f6187797-281f",
+      "payment_intent_id": "int_sgpvb7qw4hnpdl9vi5b",
+      "payment_attempt_id": "att_sgpvb7qw4hnpdlhxfng_l9vi5b",
+      "acquirer_reference_number": "",
+      "payment_method_type": "VISA",
+      "card_brand": "visa",
+      "reason": {
+        "original_code": "10.4",
+        "description": "Other Fraud-Card Absent Environment",
+        "type": "FRAUDULENT"
+      },
+      "accept_details": [],
+      "challenge_details": [
+        {
+          "stage": "RFI",
+          "customer_info": {},
+          "seller_info": {
+            "name": "Fernhill Audio Ltd",
+            "store_name": "Fernhill Audio",
+            "store_physical_address": "1 Demo Street, San Francisco, CA 94103, US",
+            "store_url": "https://example.com/fernhill-audio"
+          },
+          "delivery_info": {
+            "delivered_at": "2026-10-30T20:51:25+00:00",
+            "name": "Alex Sample",
+            "address": "2 Sample Street, San Francisco, CA 94103, US",
+            "shipping_company": "ups",
+            "tracking_number": "1Z999AA10123456784",
+            "status": "DELIVERED"
+          },
+          "order_info": {
+            "id": "FH-1109-f6187797-281f",
+            "invoice_number": "INV-1109",
+            "total_amount": 1249,
+            "total_currency": "USD",
+            "products": [
+              {
+                "name": "Over-ear studio headphones",
+                "unit_price": 1249,
+                "currency": "",
+                "quantity": 1
+              }
+            ],
+            "created_at": "2026-10-30T20:51:19+00:00"
+          },
+          "supporting_documents": {
+            "generated_files": [
+              "MDAwMDAwMDAtMDAwMC00MDAwLTgwMDAtMDAwMDAwMDAwMDAwLHwsc2csfCxFdmlkZW5jZV9Qcm92aWRlZF9Gb3JtNjE5OTAxNDQyNDg0Mzc3MTE5NS5wZGZfMTc5MzM5MzUwOTYyNg"
+            ],
+            "other_documents": [
+              "MDAwMDAwMDAtMDAwMC00MDAwLTgwMDAtMDAwMDAwMDAwMDAwLHwsc2csfCxldmlkZW5jZV8xX2Y2MTg3Nzk3X2FlODgucGRmXzE3OTMzOTM1MDcwOTI"
+            ],
+            "documents": [
+              {
+                "type": "PRIMARY",
+                "file_ids": [
+                  "MDAwMDAwMDAtMDAwMC00MDAwLTgwMDAtMDAwMDAwMDAwMDAwLHwsc2csfCxldmlkZW5jZV8xX2Y2MTg3Nzk3X2FlODgucGRmXzE3OTMzOTM1MDcwOTI"
+                ],
+                "description": "Orders #1012, #1038, #1077: same card, device ID and IP, never disputed"
+              },
+              {
+                "type": "OTHER",
+                "file_ids": [
+                  "MDAwMDAwMDAtMDAwMC00MDAwLTgwMDAtMDAwMDAwMDAwMDAwLHwsc2csfCxldmlkZW5jZV8xX2Y2MTg3Nzk3X2FlODgucGRmXzE3OTMzOTM1MDcwOTI"
+                ]
+              }
+            ]
+          },
+          "challenged_by": "disputable-spike",
+          "challenged_at": "2026-10-30T20:51:50+00:00",
+          "reason": "PURCHASE_HISTORY"
+        }
+      ],
+      "due_at": "2026-11-13T20:51:18+00:00",
+      "created_at": "2026-10-30T20:51:40+00:00",
+      "updated_at": "2026-10-30T20:51:50+00:00",
+      "transaction_type": "PAYMENT"
+    },
+    "text": null,
+    "transport_error": null
+  }
+}

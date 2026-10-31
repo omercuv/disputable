@@ -1,0 +1,53 @@
+{
+  "seq": 11,
+  "run_id": "f6187797",
+  "step": "disputes",
+  "label": "dispute-list-precheck-earbuds",
+  "attempt": 1,
+  "idempotent": true,
+  "recorded_at": "2026-10-30T20:51:17+00:00",
+  "meta": {
+    "kind": "dispute_list",
+    "case": "earbuds",
+    "probe": null,
+    "params": {
+      "payment_intent_id": "int_sgpvzhfh9hnpdl0uff0",
+      "size": 100
+    }
+  },
+  "request": {
+    "method": "GET",
+    "url": "https://api.sandbox.airwallex.com/api/v1/pa/payment_disputes?payment_intent_id=int_sgpvzhfh9hnpdl0uff0&size=100",
+    "headers": {
+      "host": "api.sandbox.airwallex.com",
+      "accept-encoding": "gzip, deflate",
+      "connection": "keep-alive",
+      "accept": "application/json",
+      "user-agent": "disputable-spike/0.2",
+      "authorization": "<redacted>"
+    },
+    "body": null
+  },
+  "response": {
+    "status": 200,
+    "elapsed_ms": 559,
+    "headers": {
+      "content-type": "application/json",
+      "content-length": "12",
+      "server-timing": "traceparent;desc=\"00-1508837997924779b79a60b00f4db0b6-ec82dcf6e99ac9d9-01\", traceparent;desc=\"00-1508837997924779b79a60b00f4db0b6-4a82ab81a3851f6b-01\"",
+      "access-control-expose-headers": "Server-Timing,Server-Timing",
+      "date": "Fri, 30 Oct 2026 20:51:38 GMT",
+      "x-envoy-upstream-service-time": "20",
+      "via": "1.1 google, 1.1 google",
+      "server": "APISIX",
+      "x-b3-traceid": "1508837997924779b79a60b00f4db0b6",
+      "strict-transport-security": "max-age=15552000",
+      "alt-svc": "h3=\":443\"; ma=2592000"
+    },
+    "json": {
+      "items": []
+    },
+    "text": null,
+    "transport_error": null
+  }
+}

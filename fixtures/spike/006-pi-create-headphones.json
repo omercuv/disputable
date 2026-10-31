@@ -1,0 +1,81 @@
+{
+  "seq": 6,
+  "run_id": "f6187797",
+  "step": "payments",
+  "label": "pi-create-headphones",
+  "attempt": 1,
+  "idempotent": true,
+  "recorded_at": "2026-10-30T20:50:58+00:00",
+  "meta": {
+    "kind": "pi_create",
+    "case": "headphones"
+  },
+  "request": {
+    "method": "POST",
+    "url": "https://api.sandbox.airwallex.com/api/v1/pa/payment_intents/create",
+    "headers": {
+      "host": "api.sandbox.airwallex.com",
+      "accept-encoding": "gzip, deflate",
+      "connection": "keep-alive",
+      "accept": "application/json",
+      "user-agent": "disputable-spike/0.2",
+      "authorization": "<redacted>",
+      "content-length": "283",
+      "content-type": "application/json"
+    },
+    "body": {
+      "request_id": "640b17d9-2193-4fab-a438-01be38d0d49e",
+      "amount": 1249,
+      "currency": "USD",
+      "merchant_order_id": "FH-1109-f6187797-281f",
+      "descriptor": "FERNHILL AUDIO",
+      "return_url": "https://example.com/checkout/return",
+      "metadata": {
+        "spike_run": "f6187797",
+        "case": "headphones",
+        "order_no": "1109"
+      }
+    }
+  },
+  "response": {
+    "status": 201,
+    "elapsed_ms": 344,
+    "headers": {
+      "content-type": "application/json",
+      "content-length": "957",
+      "server-timing": "traceparent;desc=\"00-0b4691697eb646dd8381d2e9417070dd-f2c7402db4b55436-01\", traceparent;desc=\"00-0b4691697eb646dd8381d2e9417070dd-6317fba084374391-01\"",
+      "access-control-expose-headers": "Server-Timing,Server-Timing",
+      "date": "Fri, 30 Oct 2026 20:51:19 GMT",
+      "x-envoy-upstream-service-time": "33",
+      "via": "1.1 google, 1.1 google",
+      "server": "APISIX",
+      "x-b3-traceid": "0b4691697eb646dd8381d2e9417070dd",
+      "strict-transport-security": "max-age=15552000",
+      "alt-svc": "h3=\":443\"; ma=2592000"
+    },
+    "json": {
+      "id": "int_sgpvb7qw4hnpdl9vi5b",
+      "request_id": "640b17d9-2193-4fab-a438-01be38d0d49e",
+      "amount": 1249,
+      "currency": "USD",
+      "merchant_order_id": "FH-1109-f6187797-281f",
+      "descriptor": "Sandbox Business",
+      "metadata": {
+        "case": "headphones",
+        "order_no": "1109",
+        "spike_run": "f6187797"
+      },
+      "status": "REQUIRES_PAYMENT_METHOD",
+      "captured_amount": 0,
+      "created_at": "2026-10-30T20:51:19+00:00",
+      "updated_at": "2026-10-30T20:51:19+00:00",
+      "client_secret": "<redacted>",
+      "return_url": "https://example.com/checkout/return",
+      "mor_enabled": false,
+      "original_amount": 1249,
+      "original_currency": "USD"
+    },
+    "text": null,
+    "transport_error": null
+  }
+}

@@ -1,0 +1,128 @@
+{
+  "seq": 3,
+  "run_id": "f6187797",
+  "step": "payments",
+  "label": "pi-get-ear_tips-after-pay",
+  "attempt": 1,
+  "idempotent": true,
+  "recorded_at": "2026-10-30T20:50:43+00:00",
+  "meta": {
+    "kind": "pi_get",
+    "case": "ear_tips"
+  },
+  "request": {
+    "method": "GET",
+    "url": "https://api.sandbox.airwallex.com/api/v1/pa/payment_intents/int_sgpvzhfh9hnpdkrj23r",
+    "headers": {
+      "host": "api.sandbox.airwallex.com",
+      "accept-encoding": "gzip, deflate",
+      "connection": "keep-alive",
+      "accept": "application/json",
+      "user-agent": "disputable-spike/0.2",
+      "authorization": "<redacted>"
+    },
+    "body": null
+  },
+  "response": {
+    "status": 200,
+    "elapsed_ms": 498,
+    "headers": {
+      "content-type": "application/json",
+      "content-length": "2665",
+      "server-timing": "traceparent;desc=\"00-cce79edcfe4540ac82366e26d4f1a44f-5cc0da8337208387-01\", traceparent;desc=\"00-cce79edcfe4540ac82366e26d4f1a44f-f96a334b478d1d0b-01\"",
+      "access-control-expose-headers": "Server-Timing,Server-Timing",
+      "date": "Fri, 30 Oct 2026 20:51:04 GMT",
+      "x-envoy-upstream-service-time": "36",
+      "via": "1.1 google, 1.1 google",
+      "server": "APISIX",
+      "x-b3-traceid": "cce79edcfe4540ac82366e26d4f1a44f",
+      "strict-transport-security": "max-age=15552000",
+      "alt-svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+    },
+    "json": {
+      "latest_payment_attempt": {
+        "id": "att_sgpvzhfh9hnpdkzghkm_krj23r",
+        "amount": 12,
+        "currency": "USD",
+        "payment_method": {
+          "type": "card",
+          "card": {
+            "expiry_month": "12",
+            "expiry_year": "2029",
+            "name": "",
+            "bin": "40355010",
+            "last4": "0008",
+            "brand": "visa",
+            "issuer_country_code": "US",
+            "card_type": "DEBIT",
+            "fingerprint": "1YmFv4lDgPBlQ5+iz4sqfjmSUQI=",
+            "issuer_name": "SOCIETE GENERALE S.A.",
+            "is_commercial": false,
+            "number_type": "PAN",
+            "card_updater_info": {
+              "number_updated": false,
+              "expiry_updated": false
+            }
+          }
+        },
+        "merchant_order_id": "FH-1121-f6187797-1b94",
+        "payment_intent_id": "int_sgpvzhfh9hnpdkrj23r",
+        "status": "CAPTURE_REQUESTED",
+        "provider_transaction_id": "8034503227786",
+        "payment_method_transaction_id": "159307427873151",
+        "provider_original_response_code": "00",
+        "provider_original_response_description": "Authorized successfully",
+        "authorization_code": "582252",
+        "captured_amount": 12,
+        "refunded_amount": 0,
+        "created_at": "2026-10-30T20:51:02+00:00",
+        "updated_at": "2026-10-30T20:51:02+00:00",
+        "settle_via": "airwallex",
+        "authentication_data": {
+          "ds_data": {
+            "retry_count_for_auth_decline": 0
+          },
+          "fraud_data": {
+            "action": "ACCEPT",
+            "score": "0",
+            "risk_factors": []
+          },
+          "avs_result": "not_attempted",
+          "cvc_result": "matched",
+          "cvc_code": "M",
+          "account_name_verification_result": {
+            "status": "NOT_PERFORMED"
+          }
+        },
+        "payment_method_options": {
+          "card": {
+            "authorization_type": "final_auth"
+          }
+        },
+        "device_data": "<redacted>"
+      },
+      "id": "int_sgpvzhfh9hnpdkrj23r",
+      "request_id": "69b03eec-1c82-4e0a-81e1-82b6063b5a96",
+      "amount": 12,
+      "currency": "USD",
+      "merchant_order_id": "FH-1121-f6187797-1b94",
+      "descriptor": "Sandbox Business",
+      "metadata": {
+        "case": "ear_tips",
+        "order_no": "1121",
+        "spike_run": "f6187797"
+      },
+      "status": "SUCCEEDED",
+      "captured_amount": 12,
+      "created_at": "2026-10-30T20:50:49+00:00",
+      "updated_at": "2026-10-30T20:51:02+00:00",
+      "client_secret": "<redacted>",
+      "return_url": "https://example.com/checkout/return",
+      "mor_enabled": false,
+      "original_amount": 12,
+      "original_currency": "USD"
+    },
+    "text": null,
+    "transport_error": null
+  }
+}

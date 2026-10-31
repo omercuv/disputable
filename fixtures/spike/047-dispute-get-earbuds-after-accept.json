@@ -1,0 +1,83 @@
+{
+  "seq": 47,
+  "run_id": "f6187797",
+  "step": "accept-chargeback",
+  "label": "dispute-get-earbuds-after-accept",
+  "attempt": 1,
+  "idempotent": true,
+  "recorded_at": "2026-10-30T20:51:37+00:00",
+  "meta": {
+    "kind": "dispute_get",
+    "case": "earbuds",
+    "phase": "after-accept"
+  },
+  "request": {
+    "method": "GET",
+    "url": "https://api.sandbox.airwallex.com/api/v1/pa/payment_disputes/dst_sgpv8mrgwhnpdll2ndx",
+    "headers": {
+      "host": "api.sandbox.airwallex.com",
+      "accept-encoding": "gzip, deflate",
+      "connection": "keep-alive",
+      "accept": "application/json",
+      "user-agent": "disputable-spike/0.2",
+      "authorization": "<redacted>",
+      "cookie": "<redacted>"
+    },
+    "body": null
+  },
+  "response": {
+    "status": 200,
+    "elapsed_ms": 371,
+    "headers": {
+      "content-type": "application/json",
+      "content-length": "982",
+      "server-timing": "traceparent;desc=\"00-7773f9b41ae0441cba8f31580aba7a22-f7b9a4be0ae8acaa-01\", traceparent;desc=\"00-7773f9b41ae0441cba8f31580aba7a22-e14950c74ee6ba00-01\"",
+      "access-control-expose-headers": "Server-Timing,Server-Timing",
+      "date": "Fri, 30 Oct 2026 20:51:58 GMT",
+      "x-envoy-upstream-service-time": "41",
+      "via": "1.1 google, 1.1 google",
+      "server": "APISIX",
+      "x-b3-traceid": "7773f9b41ae0441cba8f31580aba7a22",
+      "strict-transport-security": "max-age=15552000",
+      "alt-svc": "h3=\":443\"; ma=2592000"
+    },
+    "json": {
+      "id": "dst_sgpv8mrgwhnpdll2ndx",
+      "stage": "CHARGEBACK",
+      "status": "ACCEPTED",
+      "mode": "COLLABORATION",
+      "issuer_comment": "Cardholder returned the earbuds; no credit was processed.",
+      "issuer_documents": [],
+      "amount": 189,
+      "currency": "USD",
+      "merchant_order_id": "FH-1098-f6187797-4398",
+      "payment_intent_id": "int_sgpvzhfh9hnpdl0uff0",
+      "payment_attempt_id": "att_sgpvzhfh9hnpdl87ert_l0uff0",
+      "acquirer_reference_number": "",
+      "payment_method_type": "VISA",
+      "card_brand": "visa",
+      "reason": {
+        "original_code": "13.6",
+        "description": "Credit Not Processed",
+        "type": "CREDIT_NOT_PROCESSED"
+      },
+      "accept_details": [
+        {
+          "stage": "CHARGEBACK",
+          "reason": "VALID_CUSTOMER_DISPUTE",
+          "description": "Return delivered and no credit issued; the chargeback already returned the funds.",
+          "refund": {},
+          "accepted_by": "disputable-spike",
+          "accepted_at": "2026-10-30T20:51:57+00:00"
+        }
+      ],
+      "challenge_details": [],
+      "due_at": "2026-11-13T20:51:17+00:00",
+      "created_at": "2026-10-30T20:51:38+00:00",
+      "updated_at": "2026-10-30T20:51:57+00:00",
+      "transaction_type": "PAYMENT"
+    },
+    "text": null,
+    "transport_error": null
+  }
+}

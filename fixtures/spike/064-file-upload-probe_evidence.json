@@ -1,0 +1,74 @@
+{
+  "seq": 64,
+  "run_id": "f6187797",
+  "step": "probe",
+  "label": "file-upload-probe_evidence",
+  "attempt": 1,
+  "idempotent": false,
+  "recorded_at": "2026-10-30T20:52:34+00:00",
+  "meta": {
+    "kind": "upload",
+    "file_key": "probe_evidence",
+    "format": "pdf",
+    "guesses": [
+      "FILE_UPLOAD_PATH",
+      "FILE_ID_KEYS"
+    ]
+  },
+  "request": {
+    "method": "POST",
+    "url": "https://files.sandbox.airwallex.com/api/v1/files/upload",
+    "headers": {
+      "host": "files.sandbox.airwallex.com",
+      "accept-encoding": "gzip, deflate",
+      "connection": "keep-alive",
+      "accept": "application/json",
+      "user-agent": "disputable-spike/0.2",
+      "authorization": "<redacted>",
+      "cookie": "<redacted>",
+      "content-length": "1109",
+      "content-type": "multipart/form-data; boundary=e5ac0b27826437a8385314e389c4757a"
+    },
+    "body": {
+      "multipart": {
+        "file": {
+          "filename": "probe_evidence_f6187797_aeaa.pdf",
+          "content_type": "application/pdf",
+          "bytes": 799,
+          "sha256": "1a8059755cdad6d1fd6c2f701b5fee57dc8a51c683de03faacf96f1413e3e02e",
+          "copy": "fixtures/spike/probe_evidence_f6187797_aeaa.pdf"
+        },
+        "notes": "Spike probe, not evidence"
+      }
+    }
+  },
+  "response": {
+    "status": 201,
+    "elapsed_ms": 971,
+    "headers": {
+      "date": "Fri, 30 Oct 2026 20:52:56 GMT",
+      "content-type": "application/json",
+      "transfer-encoding": "chunked",
+      "connection": "keep-alive",
+      "server-timing": "traceparent;desc=\"00-cdbbc2ed6332405dbfc6adf9b5457c0a-ffa006d819fa8ff1-01\"",
+      "access-control-expose-headers": "Server-Timing",
+      "x-envoy-upstream-service-time": "200",
+      "via": "1.1 google, 1.1 google",
+      "server": "cloudflare",
+      "x-b3-traceid": "cdbbc2ed6332405dbfc6adf9b5457c0a",
+      "strict-transport-security": "max-age=15552000",
+      "cf-cache-status": "DYNAMIC",
+      "cf-ray": "<redacted>"
+    },
+    "json": {
+      "created": 1793393575,
+      "file_id": "MDAwMDAwMDAtMDAwMC00MDAwLTgwMDAtMDAwMDAwMDAwMDAwLHwsc2csfCxwcm9iZV9ldmlkZW5jZV9mNjE4Nzc5N19hZWFhLnBkZl8xNzkzMzkzNTc1ODUx",
+      "filename": "probe_evidence_f6187797_aeaa.pdf",
+      "notes": "Spike probe, not evidence",
+      "object_type": "file",
+      "size": 799
+    },
+    "text": null,
+    "transport_error": null
+  }
+}

@@ -1,0 +1,74 @@
+{
+  "seq": 31,
+  "run_id": "f6187797",
+  "step": "upload",
+  "label": "file-upload-evidence_1",
+  "attempt": 1,
+  "idempotent": false,
+  "recorded_at": "2026-10-30T20:51:26+00:00",
+  "meta": {
+    "kind": "upload",
+    "file_key": "evidence_1",
+    "format": "pdf",
+    "guesses": [
+      "FILE_UPLOAD_PATH",
+      "FILE_ID_KEYS"
+    ]
+  },
+  "request": {
+    "method": "POST",
+    "url": "https://files.sandbox.airwallex.com/api/v1/files/upload",
+    "headers": {
+      "host": "files.sandbox.airwallex.com",
+      "accept-encoding": "gzip, deflate",
+      "connection": "keep-alive",
+      "accept": "application/json",
+      "user-agent": "disputable-spike/0.2",
+      "authorization": "<redacted>",
+      "content-length": "1553",
+      "content-type": "multipart/form-data; boundary=c1c667a67f83c4c55ee422f1974f060b"
+    },
+    "body": {
+      "multipart": {
+        "file": {
+          "filename": "evidence_1_f6187797_ae88.pdf",
+          "content_type": "application/pdf",
+          "bytes": 1239,
+          "sha256": "b60d252aad3ba02d98d060b28c8e4ba0c87630d0f5854e4f1a21623a8f2f6585",
+          "copy": "fixtures/spike/evidence_1_f6187797_ae88.pdf"
+        },
+        "notes": "Prior purchase history, Visa 0008"
+      }
+    }
+  },
+  "response": {
+    "status": 201,
+    "elapsed_ms": 991,
+    "headers": {
+      "date": "Fri, 30 Oct 2026 20:51:47 GMT",
+      "content-type": "application/json",
+      "transfer-encoding": "chunked",
+      "connection": "keep-alive",
+      "server-timing": "traceparent;desc=\"00-913603a77bf14fd4ab7f1d20310c3102-61fa4890d2ade3f1-01\"",
+      "access-control-expose-headers": "Server-Timing",
+      "x-envoy-upstream-service-time": "329",
+      "via": "1.1 google, 1.1 google",
+      "server": "cloudflare",
+      "x-b3-traceid": "913603a77bf14fd4ab7f1d20310c3102",
+      "strict-transport-security": "max-age=15552000",
+      "cf-cache-status": "DYNAMIC",
+      "set-cookie": "<redacted>",
+      "cf-ray": "<redacted>"
+    },
+    "json": {
+      "created": 1793393507,
+      "file_id": "MDAwMDAwMDAtMDAwMC00MDAwLTgwMDAtMDAwMDAwMDAwMDAwLHwsc2csfCxldmlkZW5jZV8xX2Y2MTg3Nzk3X2FlODgucGRmXzE3OTMzOTM1MDcwOTI",
+      "filename": "evidence_1_f6187797_ae88.pdf",
+      "notes": "Prior purchase history, Visa 0008",
+      "object_type": "file",
+      "size": 1239
+    },
+    "text": null,
+    "transport_error": null
+  }
+}

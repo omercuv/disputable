@@ -1,0 +1,80 @@
+{
+  "seq": 23,
+  "run_id": "f6187797",
+  "step": "read",
+  "label": "dispute-list-by-pi-headphones",
+  "attempt": 1,
+  "idempotent": true,
+  "recorded_at": "2026-10-30T20:51:22+00:00",
+  "meta": {
+    "kind": "dispute_list",
+    "case": "headphones",
+    "probe": null,
+    "params": {
+      "payment_intent_id": "int_sgpvb7qw4hnpdl9vi5b"
+    }
+  },
+  "request": {
+    "method": "GET",
+    "url": "https://api.sandbox.airwallex.com/api/v1/pa/payment_disputes?payment_intent_id=int_sgpvb7qw4hnpdl9vi5b",
+    "headers": {
+      "host": "api.sandbox.airwallex.com",
+      "accept-encoding": "gzip, deflate",
+      "connection": "keep-alive",
+      "accept": "application/json",
+      "user-agent": "disputable-spike/0.2",
+      "authorization": "<redacted>"
+    },
+    "body": null
+  },
+  "response": {
+    "status": 200,
+    "elapsed_ms": 359,
+    "headers": {
+      "content-type": "application/json",
+      "content-length": "760",
+      "server-timing": "traceparent;desc=\"00-79b54e80fab14303b64b5148c4129a9d-c582ed3cbcd92f06-01\", traceparent;desc=\"00-79b54e80fab14303b64b5148c4129a9d-3e3d6a705f4fdc1b-01\"",
+      "access-control-expose-headers": "Server-Timing,Server-Timing",
+      "date": "Fri, 30 Oct 2026 20:51:43 GMT",
+      "x-envoy-upstream-service-time": "42",
+      "via": "1.1 google, 1.1 google",
+      "server": "APISIX",
+      "x-b3-traceid": "79b54e80fab14303b64b5148c4129a9d",
+      "strict-transport-security": "max-age=15552000",
+      "alt-svc": "h3=\":443\"; ma=2592000"
+    },
+    "json": {
+      "items": [
+        {
+          "id": "dst_sgpvfc6s8hnpdllyz1y",
+          "stage": "RFI",
+          "status": "REQUIRES_RESPONSE",
+          "mode": "ALLOCATION",
+          "issuer_comment": "Cardholder does not recognise this card-absent transaction.",
+          "issuer_documents": [],
+          "amount": 1249,
+          "currency": "USD",
+          "merchant_order_id": "FH-1109-f6187797-281f",
+          "payment_intent_id": "int_sgpvb7qw4hnpdl9vi5b",
+          "payment_attempt_id": "att_sgpvb7qw4hnpdlhxfng_l9vi5b",
+          "acquirer_reference_number": "",
+          "payment_method_type": "VISA",
+          "card_brand": "visa",
+          "reason": {
+            "original_code": "10.4",
+            "description": "Other Fraud-Card Absent Environment",
+            "type": "FRAUDULENT"
+          },
+          "accept_details": [],
+          "challenge_details": [],
+          "due_at": "2026-11-13T20:51:18+00:00",
+          "created_at": "2026-10-30T20:51:40+00:00",
+          "updated_at": "2026-10-30T20:51:40+00:00",
+          "transaction_type": "PAYMENT"
+        }
+      ]
+    },
+    "text": null,
+    "transport_error": null
+  }
+}

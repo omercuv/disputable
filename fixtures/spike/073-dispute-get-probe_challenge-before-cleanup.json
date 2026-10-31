@@ -1,0 +1,116 @@
+{
+  "seq": 73,
+  "run_id": "f6187797",
+  "step": "probe",
+  "label": "dispute-get-probe_challenge-before-cleanup",
+  "attempt": 1,
+  "idempotent": true,
+  "recorded_at": "2026-10-30T20:52:40+00:00",
+  "meta": {
+    "kind": "dispute_get",
+    "case": "probe_challenge",
+    "phase": "before-cleanup"
+  },
+  "request": {
+    "method": "GET",
+    "url": "https://api.sandbox.airwallex.com/api/v1/pa/payment_disputes/dst_sgpv8mrgwhnpdmu8p7c",
+    "headers": {
+      "host": "api.sandbox.airwallex.com",
+      "accept-encoding": "gzip, deflate",
+      "connection": "keep-alive",
+      "accept": "application/json",
+      "user-agent": "disputable-spike/0.2",
+      "authorization": "<redacted>",
+      "cookie": "<redacted>"
+    },
+    "body": null
+  },
+  "response": {
+    "status": 200,
+    "elapsed_ms": 382,
+    "headers": {
+      "content-type": "application/json",
+      "content-length": "1838",
+      "server-timing": "traceparent;desc=\"00-ea0cade6b4064ad8b6de100b49600389-7ecc1dacd98b8001-01\", traceparent;desc=\"00-ea0cade6b4064ad8b6de100b49600389-5d02e46ac7d7d163-01\"",
+      "access-control-expose-headers": "Server-Timing,Server-Timing",
+      "date": "Fri, 30 Oct 2026 20:53:01 GMT",
+      "x-envoy-upstream-service-time": "47",
+      "via": "1.1 google, 1.1 google",
+      "server": "APISIX",
+      "x-b3-traceid": "ea0cade6b4064ad8b6de100b49600389",
+      "strict-transport-security": "max-age=15552000",
+      "alt-svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+    },
+    "json": {
+      "id": "dst_sgpv8mrgwhnpdmu8p7c",
+      "stage": "RFI",
+      "status": "CHALLENGED",
+      "mode": "COLLABORATION",
+      "issuer_comment": "Spike challenge probe (not part of the demo).",
+      "issuer_documents": [],
+      "amount": 25,
+      "currency": "USD",
+      "merchant_order_id": "FH-9002-f6187797-f88e",
+      "payment_intent_id": "int_sgpvzhfh9hnpdmfh8le",
+      "payment_attempt_id": "att_sgpvb7qw4hnpdms3rts_mfh8le",
+      "acquirer_reference_number": "",
+      "payment_method_type": "VISA",
+      "card_brand": "visa",
+      "reason": {
+        "original_code": "13.1",
+        "description": "Merchandise/ Services Not Received",
+        "type": "PRODUCT_NOT_RECEIVED"
+      },
+      "accept_details": [],
+      "challenge_details": [
+        {
+          "stage": "RFI",
+          "customer_info": {},
+          "seller_info": {
+            "store_name": "Sandbox Business",
+            "store_physical_address": "51055 Krajcik Roads",
+            "store_url": "https://github.com/00000000-0000-4000-8000-000000000000"
+          },
+          "delivery_info": {},
+          "order_info": {
+            "id": "FH-9002-f6187797-f88e",
+            "total_currency": "USD",
+            "created_at": "2026-10-30T20:52:29+00:00"
+          },
+          "supporting_documents": {
+            "generated_files": [
+              "MDAwMDAwMDAtMDAwMC00MDAwLTgwMDAtMDAwMDAwMDAwMDAwLHwsc2csfCxFdmlkZW5jZV9Qcm92aWRlZF9Gb3JtMzQxOTA2NjU1OTc3NjQ1ODc1LnBkZl8xNzkzMzkzNTc4MTQy"
+            ],
+            "other_documents": [
+              "MDAwMDAwMDAtMDAwMC00MDAwLTgwMDAtMDAwMDAwMDAwMDAwLHwsc2csfCxwcm9iZV9ldmlkZW5jZV9mNjE4Nzc5N19hZWFhLnBkZl8xNzkzMzkzNTc1ODUx"
+            ],
+            "documents": [
+              {
+                "type": "PRIMARY",
+                "file_ids": [
+                  "MDAwMDAwMDAtMDAwMC00MDAwLTgwMDAtMDAwMDAwMDAwMDAwLHwsc2csfCxwcm9iZV9ldmlkZW5jZV9mNjE4Nzc5N19hZWFhLnBkZl8xNzkzMzkzNTc1ODUx"
+                ],
+                "description": "probe"
+              },
+              {
+                "type": "OTHER",
+                "file_ids": [
+                  "MDAwMDAwMDAtMDAwMC00MDAwLTgwMDAtMDAwMDAwMDAwMDAwLHwsc2csfCxwcm9iZV9ldmlkZW5jZV9mNjE4Nzc5N19hZWFhLnBkZl8xNzkzMzkzNTc1ODUx"
+                ]
+              }
+            ]
+          },
+          "challenged_by": "disputable-spike",
+          "challenged_at": "2026-10-30T20:52:58+00:00",
+          "reason": "OTHER_REASONS"
+        }
+      ],
+      "due_at": "2026-11-13T20:52:32+00:00",
+      "created_at": "2026-10-30T20:52:54+00:00",
+      "updated_at": "2026-10-30T20:52:58+00:00",
+      "transaction_type": "PAYMENT"
+    },
+    "text": null,
+    "transport_error": null
+  }
+}

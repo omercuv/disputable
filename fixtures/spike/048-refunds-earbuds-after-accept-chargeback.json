@@ -1,0 +1,51 @@
+{
+  "seq": 48,
+  "run_id": "f6187797",
+  "step": "accept-chargeback",
+  "label": "refunds-earbuds-after-accept-chargeback",
+  "attempt": 1,
+  "idempotent": true,
+  "recorded_at": "2026-10-30T20:51:37+00:00",
+  "meta": {
+    "kind": "refunds_list",
+    "case": "earbuds",
+    "phase": "after-accept-chargeback"
+  },
+  "request": {
+    "method": "GET",
+    "url": "https://api.sandbox.airwallex.com/api/v1/pa/refunds?payment_intent_id=int_sgpvzhfh9hnpdl0uff0&page_num=0&page_size=100",
+    "headers": {
+      "host": "api.sandbox.airwallex.com",
+      "accept-encoding": "gzip, deflate",
+      "connection": "keep-alive",
+      "accept": "application/json",
+      "user-agent": "disputable-spike/0.2",
+      "authorization": "<redacted>",
+      "cookie": "<redacted>"
+    },
+    "body": null
+  },
+  "response": {
+    "status": 200,
+    "elapsed_ms": 557,
+    "headers": {
+      "content-type": "application/json",
+      "content-length": "29",
+      "server-timing": "traceparent;desc=\"00-5568c290eb3c40179afedd504ccadb21-6c103799496c0c1f-01\", traceparent;desc=\"00-5568c290eb3c40179afedd504ccadb21-a331b4fe595a1df4-01\"",
+      "access-control-expose-headers": "Server-Timing,Server-Timing",
+      "date": "Fri, 30 Oct 2026 20:51:58 GMT",
+      "x-envoy-upstream-service-time": "16",
+      "via": "1.1 google, 1.1 google",
+      "server": "APISIX",
+      "x-b3-traceid": "5568c290eb3c40179afedd504ccadb21",
+      "strict-transport-security": "max-age=15552000",
+      "alt-svc": "h3=\":443\"; ma=2592000"
+    },
+    "json": {
+      "has_more": false,
+      "items": []
+    },
+    "text": null,
+    "transport_error": null
+  }
+}

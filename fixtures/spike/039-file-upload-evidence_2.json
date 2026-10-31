@@ -1,0 +1,74 @@
+{
+  "seq": 39,
+  "run_id": "f6187797",
+  "step": "challenge-2",
+  "label": "file-upload-evidence_2",
+  "attempt": 1,
+  "idempotent": false,
+  "recorded_at": "2026-10-30T20:51:32+00:00",
+  "meta": {
+    "kind": "upload",
+    "file_key": "evidence_2",
+    "format": "pdf",
+    "guesses": [
+      "FILE_UPLOAD_PATH",
+      "FILE_ID_KEYS"
+    ]
+  },
+  "request": {
+    "method": "POST",
+    "url": "https://files.sandbox.airwallex.com/api/v1/files/upload",
+    "headers": {
+      "host": "files.sandbox.airwallex.com",
+      "accept-encoding": "gzip, deflate",
+      "connection": "keep-alive",
+      "accept": "application/json",
+      "user-agent": "disputable-spike/0.2",
+      "authorization": "<redacted>",
+      "cookie": "<redacted>",
+      "content-length": "1434",
+      "content-type": "multipart/form-data; boundary=5aadb4ef5e57794cdb2b4f56605efdb3"
+    },
+    "body": {
+      "multipart": {
+        "file": {
+          "filename": "evidence_2_f6187797_4564.pdf",
+          "content_type": "application/pdf",
+          "bytes": 1112,
+          "sha256": "c233f4bd7204c17266dbf5171a99e59cae6840dd72acdd837152ba977b93335c",
+          "copy": "fixtures/spike/evidence_2_f6187797_4564.pdf"
+        },
+        "notes": "Signed delivery and warranty registration"
+      }
+    }
+  },
+  "response": {
+    "status": 201,
+    "elapsed_ms": 887,
+    "headers": {
+      "date": "Fri, 30 Oct 2026 20:51:53 GMT",
+      "content-type": "application/json",
+      "transfer-encoding": "chunked",
+      "connection": "keep-alive",
+      "server-timing": "traceparent;desc=\"00-5d1eb6334f4345719901412a6def940b-99e278aad2a7ff52-01\"",
+      "access-control-expose-headers": "Server-Timing",
+      "x-envoy-upstream-service-time": "270",
+      "via": "1.1 google, 1.1 google",
+      "server": "cloudflare",
+      "x-b3-traceid": "5d1eb6334f4345719901412a6def940b",
+      "strict-transport-security": "max-age=15552000",
+      "cf-cache-status": "DYNAMIC",
+      "cf-ray": "<redacted>"
+    },
+    "json": {
+      "created": 1793393513,
+      "file_id": "MDAwMDAwMDAtMDAwMC00MDAwLTgwMDAtMDAwMDAwMDAwMDAwLHwsc2csfCxldmlkZW5jZV8yX2Y2MTg3Nzk3XzQ1NjQucGRmXzE3OTMzOTM1MTMwMTM",
+      "filename": "evidence_2_f6187797_4564.pdf",
+      "notes": "Signed delivery and warranty registration",
+      "object_type": "file",
+      "size": 1112
+    },
+    "text": null,
+    "transport_error": null
+  }
+}

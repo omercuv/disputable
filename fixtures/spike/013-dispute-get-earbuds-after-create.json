@@ -1,0 +1,73 @@
+{
+  "seq": 13,
+  "run_id": "f6187797",
+  "step": "disputes",
+  "label": "dispute-get-earbuds-after-create",
+  "attempt": 1,
+  "idempotent": true,
+  "recorded_at": "2026-10-30T20:51:18+00:00",
+  "meta": {
+    "kind": "dispute_get",
+    "case": "earbuds",
+    "phase": "after-create"
+  },
+  "request": {
+    "method": "GET",
+    "url": "https://api.sandbox.airwallex.com/api/v1/pa/payment_disputes/dst_sgpv8mrgwhnpdll2ndx",
+    "headers": {
+      "host": "api.sandbox.airwallex.com",
+      "accept-encoding": "gzip, deflate",
+      "connection": "keep-alive",
+      "accept": "application/json",
+      "user-agent": "disputable-spike/0.2",
+      "authorization": "<redacted>"
+    },
+    "body": null
+  },
+  "response": {
+    "status": 200,
+    "elapsed_ms": 363,
+    "headers": {
+      "content-type": "application/json",
+      "content-length": "750",
+      "server-timing": "traceparent;desc=\"00-a2597d0df7b940c0a215f073cb6ab199-4473cf2c532632c5-01\", traceparent;desc=\"00-a2597d0df7b940c0a215f073cb6ab199-a2dd9eb0f9e8e6f6-01\"",
+      "access-control-expose-headers": "Server-Timing,Server-Timing",
+      "date": "Fri, 30 Oct 2026 20:51:39 GMT",
+      "x-envoy-upstream-service-time": "39",
+      "via": "1.1 google, 1.1 google",
+      "server": "APISIX",
+      "x-b3-traceid": "a2597d0df7b940c0a215f073cb6ab199",
+      "strict-transport-security": "max-age=15552000",
+      "alt-svc": "h3=\":443\"; ma=2592000"
+    },
+    "json": {
+      "id": "dst_sgpv8mrgwhnpdll2ndx",
+      "stage": "CHARGEBACK",
+      "status": "REQUIRES_RESPONSE",
+      "mode": "COLLABORATION",
+      "issuer_comment": "Cardholder returned the earbuds; no credit was processed.",
+      "issuer_documents": [],
+      "amount": 189,
+      "currency": "USD",
+      "merchant_order_id": "FH-1098-f6187797-4398",
+      "payment_intent_id": "int_sgpvzhfh9hnpdl0uff0",
+      "payment_attempt_id": "att_sgpvzhfh9hnpdl87ert_l0uff0",
+      "acquirer_reference_number": "",
+      "payment_method_type": "VISA",
+      "card_brand": "visa",
+      "reason": {
+        "original_code": "13.6",
+        "description": "Credit Not Processed",
+        "type": "CREDIT_NOT_PROCESSED"
+      },
+      "accept_details": [],
+      "challenge_details": [],
+      "due_at": "2026-11-13T20:51:17+00:00",
+      "created_at": "2026-10-30T20:51:38+00:00",
+      "updated_at": "2026-10-30T20:51:38+00:00",
+      "transaction_type": "PAYMENT"
+    },
+    "text": null,
+    "transport_error": null
+  }
+}
