@@ -10,7 +10,7 @@ recorded.
 Setup
     uv sync                      (or: pip install httpx python-dotenv playwright)
     The payments step needs Microsoft Edge or Google Chrome installed (otherwise: playwright install chromium).
-    Copy .env.example to .env in the project root and fill in:
+    Create a file named .env in the project root with:
         AWX_CLIENT_ID=...
         AWX_API_KEY=...
         AWX_BASE_URL=https://api.sandbox.airwallex.com      (optional)
@@ -727,7 +727,7 @@ def load_config() -> Config:
     client_id = (os.getenv("AWX_CLIENT_ID") or "").strip()
     api_key = (os.getenv("AWX_API_KEY") or "").strip()
     if not client_id or not api_key:
-        raise SystemExit(f"AWX_CLIENT_ID and AWX_API_KEY must be set in {ENV_PATH} (see .env.example).")
+        raise SystemExit(f"AWX_CLIENT_ID and AWX_API_KEY must be set in {ENV_PATH} (see docs/getting-api-keys.md).")
     add_secret(client_id)
     add_secret(api_key)
     return Config(client_id, api_key, urls["AWX_BASE_URL"], urls["AWX_FILES_URL"])

@@ -21,7 +21,7 @@ Disputable needs two sets of keys. Both go only in the `.env` file in the projec
    - Under **Account permissions**, select your account in **Accounts**.
    - Under **Account permissions**, tick **Write** on Simulations, Payment Acceptance, Payment Disputes and Upload Files.
    - Click **Next** and finish the remaining screens. Copy the **Client ID** and the API key straight away, because Airwallex shows the key only once. If you lose it, regenerate it. The old key then stops working.
-9. Open `.env` and fill in the two lines:
+9. Create a file named exactly `.env` in the project folder, with these two lines. In Notepad, set **Save as type** to **All files** so the name doesn't end in `.txt`.
    ```
    AWX_CLIENT_ID=your client id
    AWX_API_KEY=your api key

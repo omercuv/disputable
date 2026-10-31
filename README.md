@@ -16,7 +16,14 @@ Requirements: Python 3.12+ and [uv](https://docs.astral.sh/uv/).
 uv sync
 ```
 
-Then copy `.env.example` to `.env` and fill in your Airwallex **sandbox** Client ID and API key. Never commit `.env`. [docs/getting-api-keys.md](docs/getting-api-keys.md) explains how to get the keys.
+Then create a file named `.env` in the project folder with your Airwallex **sandbox** Client ID and API key:
+
+```
+AWX_CLIENT_ID=your client id
+AWX_API_KEY=your api key
+```
+
+Never commit `.env`. [docs/getting-api-keys.md](docs/getting-api-keys.md) explains how to get the keys.
 
 ## Sandbox spike
 
