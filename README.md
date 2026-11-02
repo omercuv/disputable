@@ -27,7 +27,7 @@ Never commit `.env`. [docs/getting-api-keys.md](docs/getting-api-keys.md) explai
 
 ## Sandbox spike
 
-`scripts/spike.py` runs the real dispute flow against the Airwallex sandbox and records every request and response (with secrets removed) in `fixtures/spike/`.
+`scripts/spike.py` runs the real dispute flow against the Airwallex sandbox and records every request and response in `fixtures/spike/`, with secrets, browser details and the account ID removed. The store, customer and orders in them are made up.
 
 ```bash
 uv run python scripts/spike.py all

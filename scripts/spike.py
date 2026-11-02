@@ -76,6 +76,7 @@ prints what the API said about it.
 from __future__ import annotations
 
 import argparse
+import base64
 import hashlib
 import http.server
 import json
@@ -346,8 +347,13 @@ EVIDENCE_PROBE = {
 
 # ----------------------------------------------------------------------------- redaction
 REDACTED = "<redacted>"
-SECRET_HEADERS = {"authorization", "x-api-key", "x-client-id", "cookie", "set-cookie"}
-SECRET_KEYS = {"token", "access_token", "refresh_token", "client_secret", "api_key"}
+SECRET_HEADERS = {"authorization", "x-api-key", "x-client-id", "cookie", "set-cookie",
+                  "cf-ray"}  # cf-ray ends in the code of the Cloudflare site that answered, so it shows the rough location
+SECRET_KEYS = {"token", "access_token", "refresh_token", "client_secret", "api_key",
+               "device_data"}  # device_data holds the paying browser's real IP address
+ADDRESS = re.compile(r"(?<![\w.:])(?:(?:\d{1,3}\.){3}\d{1,3}|(?:[0-9A-Fa-f]{0,4}:){3,7}[0-9A-Fa-f]{0,4})(?![\w.:])")
+OWN_ADDRESSES = {"127.0.0.1", CUSTOMER_IP}  # the local checkout page and the made-up customer
+ACCOUNT_ID_STAND_IN = "00000000-0000-4000-8000-000000000000"
 _SECRET_VALUES: set[str] = set()
 
 
@@ -357,9 +363,31 @@ def add_secret(value: Any) -> None:
 
 
 def scrub(text: str) -> str:
-    """Last line of defence: remove every known secret value from a string."""
+    """Last line of defence: remove every known secret value and any address that isn't the script's own.
+    An error page can print the caller's IP in a field no rule above knows about."""
     for value in sorted(_SECRET_VALUES, key=len, reverse=True):
         text = text.replace(value, REDACTED)
+    return ADDRESS.sub(lambda found: found.group() if found.group() in OWN_ADDRESSES else REDACTED, text)
+
+
+def _base64(text: str) -> str:
+    return base64.b64encode(text.encode()).decode()
+
+
+def hide_account_id(text: str) -> str:
+    """For recordings only. A file id is base64 of '<account id>,|,<region>,|,<file name>', and Airwallex also fills in
+    a store URL from the id, so both forms get a stand-in. state.json keeps the real file ids, which a resume needs."""
+    found = set(re.findall(r'github\.com/([0-9a-f-]{36})"', text))
+    for token in re.findall(r'"([A-Za-z0-9+/]{48,})"', text):
+        try:
+            decoded = base64.b64decode(token + "=" * (-len(token) % 4)).decode()
+        except ValueError:  # not base64 or not text
+            continue
+        if ",|," in decoded:
+            found.add(decoded.split(",|,")[0])
+    for account_id in found:
+        if len(account_id) == len(ACCOUNT_ID_STAND_IN):  # 36 bytes, so its base64 is a clean prefix of each file id
+            text = text.replace(account_id, ACCOUNT_ID_STAND_IN).replace(_base64(account_id), _base64(ACCOUNT_ID_STAND_IN))
     return text
 
 
@@ -747,7 +775,7 @@ class Recorder:
         slug = re.sub(r"[^a-z0-9_.-]+", "-", label.lower()).strip("-")[:70] or "call"
         path = self.folder / f"{self.seq:03d}-{slug}.json"
         text = json.dumps(redact({"seq": self.seq, **record}), indent=2, ensure_ascii=False, default=str)
-        path.write_text(scrub(text), encoding="utf-8", newline="\n")  # same bytes on Windows and macOS
+        path.write_text(hide_account_id(scrub(text)), encoding="utf-8", newline="\n")  # same bytes on Windows and macOS
         return path.name
 
 

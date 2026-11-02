@@ -40,7 +40,7 @@ Disputable needs two sets of keys. Both go only in the `.env` file in the projec
 - **Business stuck "In review":** check the name (step 5). If that's not it, email devhelp@airwallex.com.
 - **`login` fails with 401:** the key is wrong or was regenerated. Copy both values again.
 - **403 on later calls:** the key is missing a permission. Edit the key and add the permissions from step 8. The key itself doesn't change.
-- **"This account is not enabled for native API access":** this is expected if you send a raw card number from your own server, even though the hackathon guide tells you to. Airwallex's sandbox settings page says this access needs PCI-DSS certification. The spike doesn't use it: it pays with the test card inside Airwallex's own card form (the Airwallex.js Card element), which worked on our account on 2026-10-30.
+- **"This account is not enabled for native API access":** this is expected if you send a raw card number from your own server. Airwallex's sandbox settings page says this access needs PCI-DSS certification. The spike doesn't use it: it pays with the test card inside Airwallex's own card form (the Airwallex.js Card element), which worked on our account on 2026-10-30.
 - **`payments` fails with `no browser found`:** install Microsoft Edge or Google Chrome, or run `uv run playwright install chromium`.
 
 ## 2. Claude API key

@@ -1,6 +1,8 @@
-# Secrets
-.env
-.env.*
+# Secrets (.env* also catches the conflict copies OneDrive makes)
+.env*
+*.env
+*.pem
+*.key
 
 # Python
 __pycache__/
@@ -13,14 +15,20 @@ build/
 dist/
 
 # Local data
-*.sqlite3
+*.sqlite*
 *.db
+*.db-*
+*.log
+*.har
 fixtures/spike/state.json
 fixtures/spike/*.tmp
 fixtures/spike/archive-*/
 
-# Editors / OS
+# Editors / OS / local tools
 .vscode/
 .idea/
+.claude/
+.mcp.json
 .DS_Store
 Thumbs.db
+desktop.ini
