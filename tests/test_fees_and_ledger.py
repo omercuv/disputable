@@ -60,6 +60,11 @@ def test_table_cant_be_edited_in_place():
         FEES_V1.chargeback_win_chance[EvidenceClass.NONE] = Decimal("1")
 
 
+def test_unpriced_proof_has_no_chance_anywhere():
+    for table in (FEES_V1.rfi_escalation_chance, FEES_V1.chargeback_win_chance, FEES_V1.challenge_reasons):
+        assert EvidenceClass.UNPRICED_PROOF not in table
+
+
 def ear_tips():
     ledger = Ledger()
     ledger.accepted_at_rfi(money(12))

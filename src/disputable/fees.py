@@ -39,6 +39,7 @@ class EvidenceClass(Enum):
     CE3_QUALIFIED = "CE3_QUALIFIED"  # Visa CE 3.0 is met by undisputed prior orders
     INDEPENDENT_POSSESSION = "INDEPENDENT_POSSESSION"  # verified possession proof, independent of the disputed device and IP
     RESUBMITTED = "RESUBMITTED"  # only evidence the bank already rejected
+    UNPRICED_PROOF = "UNPRICED_PROOF"  # the records favour the store, but the table has no chance for this kind of proof
 
 
 class AcceptReason(Enum):  # the accept reference's list; the API rejects anything else

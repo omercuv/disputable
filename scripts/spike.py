@@ -351,7 +351,8 @@ SECRET_HEADERS = {"authorization", "x-api-key", "x-client-id", "cookie", "set-co
                   "cf-ray"}  # cf-ray ends in the code of the Cloudflare site that answered, so it shows the rough location
 SECRET_KEYS = {"token", "access_token", "refresh_token", "client_secret", "api_key",
                "device_data"}  # device_data holds the paying browser's real IP address
-ADDRESS = re.compile(r"(?<![\w.:])(?:(?:\d{1,3}\.){3}\d{1,3}|(?:[0-9A-Fa-f]{0,4}:){3,7}[0-9A-Fa-f]{0,4})(?![\w.:])")
+ADDRESS = re.compile(r"(?<![\w.])(?:\d{1,3}\.){3}\d{1,3}(?!\w|\.\d)"  # a port or the end of a sentence may follow
+                     r"|(?<![\w.])(?:[0-9A-Fa-f]{0,4}:){3,7}[0-9A-Fa-f]{0,4}(?![\w:]|\.\d)")
 OWN_ADDRESSES = {"127.0.0.1", CUSTOMER_IP}  # the local checkout page and the made-up customer
 ACCOUNT_ID_STAND_IN = "00000000-0000-4000-8000-000000000000"
 _SECRET_VALUES: set[str] = set()
@@ -368,6 +369,17 @@ def scrub(text: str) -> str:
     for value in sorted(_SECRET_VALUES, key=len, reverse=True):
         text = text.replace(value, REDACTED)
     return ADDRESS.sub(lambda found: found.group() if found.group() in OWN_ADDRESSES else REDACTED, text)
+
+
+def scrub_strings(value: Any) -> Any:
+    """Each string before it's encoded: in JSON text a line break reads \\n, and that n hides the address after it."""
+    if isinstance(value, str):
+        return scrub(value)
+    if isinstance(value, dict):
+        return {key: scrub_strings(inner) for key, inner in value.items()}
+    if isinstance(value, (list, tuple)):
+        return [scrub_strings(inner) for inner in value]
+    return value
 
 
 def _base64(text: str) -> str:
@@ -774,7 +786,7 @@ class Recorder:
         self.seq += 1
         slug = re.sub(r"[^a-z0-9_.-]+", "-", label.lower()).strip("-")[:70] or "call"
         path = self.folder / f"{self.seq:03d}-{slug}.json"
-        text = json.dumps(redact({"seq": self.seq, **record}), indent=2, ensure_ascii=False, default=str)
+        text = json.dumps(scrub_strings(redact({"seq": self.seq, **record})), indent=2, ensure_ascii=False, default=str)
         path.write_text(hide_account_id(scrub(text)), encoding="utf-8", newline="\n")  # same bytes on Windows and macOS
         return path.name
 

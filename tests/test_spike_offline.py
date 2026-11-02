@@ -69,7 +69,23 @@ def test_any_address_is_scrubbed_wherever_it_appears(address):
     assert spike.scrub(page) == '<p>Your IP: <redacted></p> {"at": "2026-10-30T20:51:14+00:00", "seen": "20:51:14"}'
 
 
-@pytest.mark.parametrize("address", ["127.0.0.1", "203.0.113.7"])
+@pytest.mark.parametrize("text, scrubbed", [
+    ("seen from 198.51.100.23.", "seen from <redacted>."),
+    ("seen from 198.51.100.23:443", "seen from <redacted>:443"),
+    ("client:198.51.100.23", "client:<redacted>"),
+    ("seen from 2001:db8:85a3::1.", "seen from <redacted>."),
+    ("client:2001:db8:85a3::1", "client:<redacted>"),
+])
+def test_an_address_is_scrubbed_whatever_sits_beside_it(text, scrubbed):
+    assert spike.scrub(text) == scrubbed
+
+
+@pytest.mark.parametrize("text", ["version 1.2.3.4.5", "at 20:51:14.", "v1.2.3.4"])
+def test_what_only_looks_like_an_address_stays(text):
+    assert spike.scrub(text) == text
+
+
+@pytest.mark.parametrize("address", ["127.0.0.1", "203.0.113.7", "127.0.0.1:8000"])
 def test_the_scripts_own_addresses_stay(address):
     assert spike.scrub(address) == address
 
@@ -129,6 +145,15 @@ def test_a_recorded_call_keeps_nothing_private(tmp_path):
         assert private not in recorded, private
 
 
+@pytest.mark.parametrize("page", ["Your IP:\n{}\n", "Your IP:\r\n{}", "Your IP:\t{}", "Your IP:\f{}", "Your IP:\x01{}"])
+def test_an_escaped_character_cant_hide_an_address_in_a_recording(tmp_path, page):
+    spike.Recorder(tmp_path).write("blocked", {"text": page.format(MADE_UP_REAL_IP),
+                                               "nested": [{"note": page.format("2001:db8::1")}]})
+    recorded, = tmp_path.glob("[0-9]*.json")
+    assert MADE_UP_REAL_IP not in recorded.read_text(encoding="utf-8")
+    assert "2001:db8::1" not in recorded.read_text(encoding="utf-8")
+
+
 def walk(value, key=None):
     """Every (key, value) in a recording, at any depth."""
     yield key, value
@@ -147,6 +172,10 @@ def test_there_are_recordings_to_check():
 def test_recordings_and_evidence_hold_no_real_address():
     for path in [*RECORDINGS, *SPIKE_FIXTURES.glob("*.pdf")]:
         assert set(spike.ADDRESS.findall(path.read_text(encoding="latin-1"))) <= spike.OWN_ADDRESSES, path.name
+    for path in RECORDINGS:  # decoded too: in JSON text the n of a line break hides the address after it
+        for _, value in walk(json.loads(path.read_text(encoding="utf-8"))):
+            if isinstance(value, str):
+                assert set(spike.ADDRESS.findall(value)) <= spike.OWN_ADDRESSES, path.name
 
 
 def test_recordings_keep_no_browser_or_location_details():
