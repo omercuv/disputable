@@ -709,13 +709,16 @@ def test_the_suite_tests_ce3_each_way():
     assert results.count("unclear") >= 3
 
 
-def test_a_ce3_package_cites_exactly_the_priors_that_could_count():
+def test_a_ce3_package_cites_the_disputed_order_and_each_prior_with_no_fraud_on_it():
     for case in SUITE.cases:
         answer = SUITE_ANSWERS[case.id]
         if answer.evidence_class is EvidenceClass.CE3_QUALIFIED:
-            assert answer.fact_ids == {order.id for order in priors_of(SUITE, case) if order.prior_dispute != "FRAUD"
-                                       and order.number not in answer.reported_orders}, case.id
-            assert answer.fact_ids, case.id
+            disputed = SUITE.order(case.order_number)
+            earlier_on_the_card = [order for order in priors_of(SUITE, case) if order.placed_at < disputed.placed_at
+                                   and order.card_fingerprint == disputed.card_fingerprint]
+            assert answer.fact_ids == {disputed.id} | {order.id for order in earlier_on_the_card
+                                                       if order.prior_dispute != "FRAUD"
+                                                       and order.number not in answer.reported_orders}, case.id
 
 
 @pytest.mark.parametrize("store_name, case_id", ALL_CASES)

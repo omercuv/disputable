@@ -162,8 +162,8 @@ def _ce3_case(case_id: str, n: int, ce3: str, priors: list[tuple[float, dict]], 
     if reported:
         fields["comment"] = " ".join(f"Order #{prior_orders[age].number} has a Visa fraud report (TC40) from May."
                                      for age in reported)
-    facts = frozenset(prior.id for prior in prior_orders.values()
-                      if prior.prior_dispute != "FRAUD" and prior.number not in reported_orders)
+    facts = frozenset({disputed.id, *(prior.id for prior in prior_orders.values()
+                                      if prior.prior_dispute != "FRAUD" and prior.number not in reported_orders)})
     key = {"ce3": ce3, "reported_orders": reported_orders, "must_ignore": must_ignore, "must_find": (
         *(Fact(prior.id, prior.placed_at.date().isoformat()) for prior in prior_orders.values()),
         *((Fact(case_id, "Visa fraud report (TC40)"),) if reported else ()),
@@ -196,32 +196,42 @@ _ce3_case("ce3_only_one_match", 19, "fail", [(200, _differs(19, "ip", "address",
                                              (300, _differs(19, "ip", "address", "account"))])
 _ce3_case("ce3_prior_fraud_dispute", 20, "fail", [(200, {"prior_dispute": "FRAUD"}), (300, {})])
 _ce3_case("ce3_prior_other_dispute", 21, "unclear", [(200, {"prior_dispute": "NON_FRAUD"}), (300, {})],
-          conflict="Visa counts a prior with a non-fraud dispute, but Airwallex asks for undisputed priors.")
+          conflict="Order #3209 had a dispute that wasn't for fraud. Visa's FAQ still counts it, but Airwallex's CE 3.0 "
+                   "page asks for orders with no dispute. Counting it, CE 3.0 is met; without it, it isn't.")
 _ce3_case("ce3_different_matches", 22, "unclear", [(200, _differs(22, "ip", "account")),
                                                    (300, _differs(22, "device", "address"))],
-          conflict="Each prior has two matches, but not the same two, which Airwallex asks for.")
+          conflict="Orders #3218 and #3219 each match on device or IP and at least one more detail, but they don't share a "
+                   "pair like that: account and IP on #3218; delivery address and device on #3219. Airwallex's CE 3.0 page "
+                   "asks for the same pair on both. Visa's way, CE 3.0 is met; Airwallex's way, it isn't.")
 _ce3_case("ce3_priors_share_one_element_only", 83, "unclear", [(200, _differs(83, "account", "address")),
                                                                (300, _differs(83, "account", "device"))],
-          conflict="Each prior has two matches and both include the IP, but not the same two.")
+          conflict="Orders #3828 and #3829 each match on device or IP and at least one more detail, but they don't share a "
+                   "pair like that: delivery address and IP on #3828; device and IP on #3829. Airwallex's CE 3.0 page asks "
+                   "for the same pair on both. Visa's way, CE 3.0 is met; Airwallex's way, it isn't.")
 _ce3_case("ce3_same_two_plus_different_extras", 84, "pass", [(200, _differs(84, "address")), (300, _differs(84, "account"))])
+_WINDOW = ("Order #{} was placed {} days before the dispute but {} before the disputed order. Visa counts the 120 to 365 "
+           "days from the dispute, Airwallex's CE 3.0 page from the order. Counted from the {}, CE 3.0 is met; counted from "
+           "the {}, it isn't.")
 _ce3_case("ce3_window_depends_on_the_date", 23, "unclear", [(150, {}), (200, {})], gap=40,
-          conflict="One prior is 150 days before the dispute but 110 before the order, and the sources differ.")
+          conflict=_WINDOW.format(3229, 150, 110, "dispute", "order"))
 _ce3_case("ce3_too_old_depends_on_the_date", 82, "unclear", [(380, {}), (200, {})], gap=40,
-          conflict="One prior is 380 days before the dispute but 340 before the order, and the sources differ.")
+          conflict=_WINDOW.format(3818, 380, 340, "order", "dispute"))
 _ce3_case("ce3_on_the_lower_edge_from_the_dispute", 98, "unclear", [(120, {}), (200, {})], gap=1,
-          conflict="One prior is 120 days before the dispute but 119 before the order, and the sources differ.")
+          conflict=_WINDOW.format(3979, 120, 119, "dispute", "order"))
 _ce3_case("ce3_on_the_upper_edge_from_the_order", 99, "unclear", [(366, {}), (200, {})], gap=1,
-          conflict="One prior is 366 days before the dispute but 365 before the order, and the sources differ.")
+          conflict=_WINDOW.format(3988, 366, 365, "order", "dispute"))
 _ce3_case("ce3_small_fight", 24, "pass", [(200, {}), (300, {})], price="30")
 _ce3_case("ce3_not_worth_fighting", 25, "pass", [(200, {}), (300, {})], price="21", final=Action.ACCEPT)
 _ce3_case("ce3_two_good_priors_of_three", 27, "pass", [(200, {"prior_dispute": "FRAUD"}), (250, {}), (300, {})])
 _ce3_case("ce3_oldest_prior_has_the_fraud", 85, "pass", [(300, {"prior_dispute": "FRAUD"}), (250, {}), (200, {})])
 _ce3_case("ce3_prior_was_refunded", 28, "unclear", [
     (200, {"refunds": (Refund(money(89), OPENED_AT - timedelta(days=190)),)}), (300, {})],
-    conflict="One prior was refunded in full, and neither Visa's papers nor Airwallex's page covers that.")
+    conflict="Order #3279 was refunded in full ($89.00), and neither Visa nor Airwallex says whether a refunded order still "
+             "counts. Counting it, CE 3.0 is met; without it, it isn't.")
 _ce3_case("ce3_prior_partly_refunded", 29, "unclear", [
     (200, {"refunds": (Refund(money(1), OPENED_AT - timedelta(days=190)),)}), (300, {})],
-    conflict="One prior was partly refunded, and neither Visa's papers nor Airwallex's page covers that.")
+    conflict="Order #3289 was partly refunded ($1.00 of $89.00), and neither Visa nor Airwallex says whether a refunded "
+             "order still counts. Counting it, CE 3.0 is met; without it, it isn't.")
 _ce3_case("ce3_at_chargeback_first_round", 89, "pass", [(200, {}), (300, {})], stage=Stage.CHARGEBACK, final=Action.HAND_OFF)
 _ce3_case("ce3_bank_reports_one_of_three", 90, "pass", [(200, {}), (250, {}), (300, {})], reported=(200,))
 _ce3_case("ce3_bank_reports_the_only_good_pair", 91, "fail", [(200, {}), (300, {})], reported=(300,))
@@ -245,7 +255,8 @@ _priors = [_buy(87, -k, OPENED_AT - timedelta(days=age), "89", "Replacement ear 
                 device_id=_order.device_id, ip_address=_order.ip_address) for k, age in enumerate((200, 300), 1)]
 _scans.extend(scan for prior in _priors for scan in delivered(prior, prior.placed_at + timedelta(days=4)))
 _case("ce3_priors_on_another_customer_same_card", _order, Stage.RFI, "10.4", Answer(
-    first_call=Action.GATHER_EVIDENCE, evidence_class=EvidenceClass.CE3_QUALIFIED, fact_ids=frozenset(p.id for p in _priors),
+    first_call=Action.GATHER_EVIDENCE, evidence_class=EvidenceClass.CE3_QUALIFIED,
+    fact_ids=frozenset({_order.id, *(prior.id for prior in _priors)}),
     file_hashes=frozenset({NEW_FILE}), final=Action.CHALLENGE, ce3="pass",
     must_find=tuple(Fact(prior.id, prior.placed_at.date().isoformat()) for prior in _priors)))
 _order = _purchase(26, three_ds=True)
