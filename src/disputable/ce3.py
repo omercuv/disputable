@@ -182,17 +182,18 @@ def check(store: Store, case: Case, reported: Iterable[str] | None = ()) -> Ce3R
                      frozenset(named & on_card), tuple(reasons), tuple(conflicts))
 
 
-def evidence(result: Ce3Result, dispute: Dispute, file_hashes: frozenset[str] = frozenset()) -> Evidence:
+def evidence(result: Ce3Result, dispute: Dispute | Case, file_hashes: frozenset[str] = frozenset()) -> Evidence:
     """What the check alone gives the engine. An unclear result is drafted as a fight, and its conflicts send it to a person.
 
-    Visa allows one CE 3.0 attempt, and the first round is when it's sent, so a later round gets nothing from it.
+    Visa allows one CE 3.0 attempt, and the first round is when it's sent, so a later round gets nothing from it. Pass
+    lifecycle.as_case(), which counts any later round, even one after an RFI nobody answered.
     """
     if result.outcome is Outcome.FAIL or _later_round(dispute):
         return Evidence(EvidenceClass.NONE)
     return Evidence(EvidenceClass.CE3_QUALIFIED, result.fact_ids, file_hashes, result.conflicts)
 
 
-def consulted(dispute: Dispute, first_call: Action, reported: Iterable[str] | None = ()) -> bool:
+def consulted(dispute: Dispute | Case, first_call: Action, reported: Iterable[str] | None = ()) -> bool:
     """Whether the check is run: on a fraud claim whose records get read, in its first round, or later if the bank reports
     an earlier order. Otherwise there's nothing it could add."""
     if dispute.reason_code != FRAUD_CLAIM or first_call is not Action.GATHER_EVIDENCE:
