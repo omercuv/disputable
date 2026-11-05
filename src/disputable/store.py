@@ -7,6 +7,7 @@ can act on a case. A record's id is what a verified fact points at, so facts are
 from __future__ import annotations
 
 import re
+import unicodedata
 from collections import Counter
 from dataclasses import dataclass, fields, is_dataclass, replace
 from datetime import datetime, timedelta
@@ -15,6 +16,34 @@ from typing import Any, Iterator
 
 from disputable.engine import Dispute, Stage, Status
 from disputable.fees import ZERO
+
+# Values that say nothing, so they can't match: what stores and scripts write when a field is empty ("0" for a guest's
+# account; "localhost", and the other names Linux hosts files give it, for the server's own name). A value is read as its
+# letters and digits, so case and punctuation don't hide one ("N/A.", "(none)"), a value with none ("--") is blank, and so
+# are placeholders joined ("None, None"). The CE 3.0 check, the files and the order history all read blanks this way.
+PLACEHOLDERS = frozenset({"unknown", "n/a", "na", "none", "null", "nil", "undefined", "not set", "(not set)", "guest", "-",
+                          "0", "localhost", "localhost.localdomain", "localhost4", "localhost4.localdomain4", "localhost6",
+                          "localhost6.localdomain6", "ip6-localhost", "ip6-loopback"})
+BLANKS = frozenset(re.sub(r"[\W_]+", "", phrase) for phrase in PLACEHOLDERS)  # joined up: "notset", and "-" is ""
+
+
+def says_nothing(value: str | None) -> bool:
+    """Whether a value is a blank or a placeholder, however it's written: "N/A.", "(none)" and "--" say nothing, and so
+    does a value whose every part is one, such as "None, None, None" (empty address fields joined)."""
+    text = (value or "").casefold()
+    return _joined(text) in BLANKS or all(_joined(part) in BLANKS for part in re.split(r"[\s,;]+", text))
+
+
+def _joined(text: str) -> str:
+    return "".join(re.findall(r"[^\W_]+", text))
+
+
+def mailbox(value: object) -> str:
+    """An email address as a sender check reads it: its own characters, composed (NFC) with spaces trimmed, and only the
+    ASCII letters in lower case, or "" when it says nothing. So a lookalike such as "straße" for "strasse" never passes
+    for the customer's address, and a customer's own non-ASCII address still matches itself."""
+    text = " ".join(unicodedata.normalize("NFC", "" if value is None else str(value)).split())
+    return "" if says_nothing(text) else "".join(char.lower() if char.isascii() else char for char in text)
 
 
 @dataclass(frozen=True)
@@ -211,10 +240,12 @@ class Store:
 
     # ------------------------------------------------------------------------- what Claude's tools can read
     def get_order_history(self, order_number: str) -> tuple[Order, ...]:
-        """Every order by the same customer or on the same card, oldest first, this one included."""
+        """Every order by the same customer or on the same card, oldest first, this one included. A card with no
+        fingerprint on record, however the blank is written, is no card, so it ties no stranger's order to this one."""
         order = self.order(order_number)
+        card = _card(order)
         history = [other for other in self.orders
-                   if other.customer_id == order.customer_id or other.card_fingerprint == order.card_fingerprint]
+                   if other.customer_id == order.customer_id or (card and _card(other) == card)]
         return tuple(sorted(history, key=lambda other: other.placed_at))
 
     def get_carrier_scans(self, order_number: str) -> tuple[Scan, ...]:
@@ -227,21 +258,42 @@ class Store:
                             key=lambda entry: entry.registered_at))
 
     def search_inbox(self, order_number: str, query: str = "") -> tuple[Email, ...]:
-        """Emails to or from this order's customer, or naming the order, oldest first. query narrows them, ignoring case."""
+        """Emails to or from this order's customer, or naming the order, oldest first. query narrows them, ignoring case.
+        An address is the customer's when it is as the sender check reads it (mailbox) or in full lower case, so the
+        inbox shows at least every email the sender check could call the customer's."""
         order = self.order(order_number)
-        addresses = {order.email.lower(), self.customer(order.customer_id).email.lower()}
+        addresses = _inbox_keys(order.email) | _inbox_keys(self.customer(order.customer_id).email)
         names_order = re.compile(rf"(?<!\d){re.escape(order_number)}(?!\d)")
         found = [email for email in self.emails
-                 if email.from_addr.lower() in addresses or email.to_addr.lower() in addresses
+                 if _inbox_keys(email.from_addr) & addresses or _inbox_keys(email.to_addr) & addresses
                  or names_order.search(f"{email.subject} {email.body}")]
         if query:
             found = [email for email in found if query.lower() in f"{email.subject} {email.body}".lower()]
         return tuple(sorted(found, key=lambda email: email.sent_at))
 
 
+def _inbox_keys(address: str) -> set[str]:
+    """How the inbox knows an address: as mailbox() reads it, and in full lower case. A blank is nobody's."""
+    key = mailbox(address)
+    return {key, address.lower()} if key else set()
+
+
+def _card(order: Order) -> str:
+    """The card's fingerprint, or "" when it says nothing, as ce3 reads it."""
+    card = order.card_fingerprint.strip()
+    return "" if says_nothing(card) else card
+
+
 def tool_view(record: Any) -> dict[str, Any]:
     """A record as Claude's tools show it: the id a fact must cite, and each value as the text the quote check holds."""
     return {"id": record.id, **_shown(record)}
+
+
+def field_text(record: Any, field: str) -> tuple[str, ...] | None:
+    """One field's text, as quote_is_in() reads it, or None when the record has no such field. The id isn't a field."""
+    if field == "id" or not is_dataclass(record) or field not in {item.name for item in fields(record)}:
+        return None
+    return tuple(_text_of(getattr(record, field)))
 
 
 def _shown(value: Any) -> Any:

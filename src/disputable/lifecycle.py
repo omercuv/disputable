@@ -16,6 +16,7 @@ The loop, the Claude layer and the screens use it like this:
     on the approval screen: record = approve(record, plan_it_showed, "Priya", now)
     if blocker(record, now) is None: record = sending(record, now); save it; POST with plan.request_id and ACTOR
     a 2xx or duplicate_request: taken(); an error no retry fixes: send_failed(); anything else: read again, then retry
+    code can't make a plan at DECIDE: hold(); a local problem before the POST (a file moved): drop(), then decide again
 """
 
 from __future__ import annotations
@@ -541,6 +542,25 @@ def book(record: CaseRecord, label: str, amount: Decimal, by: str, now: datetime
     entry = Entry(f"{label.strip()} (booked by {by.strip()})", amount)
     record = replace(record, bookings=(*record.bookings, Booking(f"person:{number}", now, (entry,), "a person")))
     return _set_current(record, person=None) if record.closed is not None else record
+
+
+def hold(record: CaseRecord, why: str) -> CaseRecord:
+    """A person handles this round and nothing is drafted, when code can't make a plan: a bug in the rules or the reader.
+    Only at DECIDE, where the round has no plan yet."""
+    step = phase(record)
+    if step is not Phase.DECIDE:
+        raise Refused(f"The case can't be held now. It is at {step.value}.")
+    return _to_person(record, why)
+
+
+def drop(record: CaseRecord, why: str) -> CaseRecord:
+    """Drop a plan that hasn't gone out, for a problem found before the POST, such as a file whose records moved or an
+    approval that isn't on file. why is a phrase with no full stop. The round is back at DECIDE: code decides it again,
+    and a person approves the new plan. A plan being sent may have landed, so it's never dropped."""
+    step = phase(record)
+    if step not in (Phase.APPROVE, Phase.SEND):
+        raise Refused(f"The plan can't be dropped now. It is at {step.value}.")
+    return _note(_set_current(record, plan=None), f"The plan was dropped: {why}.")
 
 
 # ----------------------------------------------------------------------------- saved state
@@ -1103,3 +1123,7 @@ def _broken(record: CaseRecord) -> str | None:
             or (record.history_only and record.closed is None):
         return "The record doesn't fit its last reading."
     return None
+
+
+# Public names for the approvals module and the screens: the same rules, never a copy of them.
+needs_approval, differences = _needs_approval, _differences

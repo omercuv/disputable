@@ -347,7 +347,8 @@ _case("round_2_warranty_unverified", _order, Stage.CHARGEBACK, "10.4", _hands_of
 _order = _round_2_order(39)
 _entry = _sign_up(39, _order, phone="+1 4155550100")  # nobody in the suite has this number
 _case("round_2_warranty_other_phone", _order, Stage.CHARGEBACK, "10.4", _hands_off(
-    "The warranty sign-up's text went to a phone that isn't the cardholder's, so it can't be tied to them.",
+    "The warranty sign-up's text went to a number that doesn't match the cardholder's phone on the order, so it can't be "
+    "tied to them.",
     must_find=(Fact(_entry.id, "+1 4155550100"), Fact(_order.id, _order.cardholder_phone))), **_round_2_fields(_order))
 _order = _round_2_order(55)
 _entry = _sign_up(55, _order, email="someone.else.55@example.net")

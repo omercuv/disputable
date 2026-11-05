@@ -44,6 +44,16 @@ LABELS = {"account": "Store account", "address": "Delivery address", "device": "
 ITEM = "- "  # a paragraph that starts with it is a list item: its later rows line up after the dash
 CANT_SHOW = "A record holds text this PDF can't show, so a person writes this file."
 NOT_A_NUMBER = "An amount on record isn't a number this file can show, so a person writes this file."
+
+
+class NoFileDue(ValueError):
+    """No file of this kind is due: a later round, another order, nothing to cite, or a sign-up that can't go."""
+
+
+class PersonWritesFile(ValueError):
+    """The records hold something this file can't show (CANT_SHOW, NOT_A_NUMBER, over 2 MiB): a person writes it."""
+
+
 # What carriers write as the signer when nobody signed, as far as the usual ones go. A value is read as its words, so
 # case, spaces and punctuation don't hide a phrase ("Front Door / Porch", "FRONTDOOR", "Left at front door."), and a
 # value with a NO_SIGNER word in it is a place, a release or nobody. Any other value is a signer's name, and so is a role
@@ -132,13 +142,13 @@ def purchase_history(store: Store, case: Case, result: Ce3Result) -> Document:
     and the check has already said what counts. Visa allows one CE 3.0 attempt, so it's built in a case's first round
     only: built later, from that round's check or from records that moved on, it could pass for a new file."""
     if case.prior_challenges or case.rejected_fact_ids or case.rejected_file_hashes:  # a later round, as ce3 reads one
-        raise ValueError("Visa allows one CE 3.0 attempt, and this case is past its first round.")
+        raise NoFileDue("Visa allows one CE 3.0 attempt, and this case is past its first round.")
     order = store.order(case.order_number)
     if order.id not in result.fact_ids:
-        raise ValueError(f"The CE 3.0 check given is for another order than #{order.number}.")
+        raise NoFileDue(f"The CE 3.0 check given is for another order than #{order.number}.")
     cited = [prior for prior in result.priors if prior.cited]
     if not cited:
-        raise ValueError("The CE 3.0 check cites no earlier order, so there's no purchase history to show.")
+        raise NoFileDue("The CE 3.0 check cites no earlier order, so there's no purchase history to show.")
     scan, delivery = _delivery(store, order)
     lines = [_disputed(order), *_details(order), "", "Earlier orders paid with the same card:", *map(_earlier, cited)]
     if delivery:
@@ -156,12 +166,12 @@ def warranty_registration(store: Store, case: Case, registration_id: str) -> Doc
     order = store.order(case.order_number)
     entry = store.record(registration_id)
     if not isinstance(entry, WarrantyRegistration):
-        raise ValueError(f"{registration_id} isn't a warranty registration.")
+        raise NoFileDue(f"{registration_id} isn't a warranty registration.")
     if entry.id in case.rejected_fact_ids:  # built again later, it could pass for a new file
-        raise ValueError(f"The bank already turned down warranty registration {registration_id} in an earlier round.")
+        raise NoFileDue(f"The bank already turned down warranty registration {registration_id} in an earlier round.")
     serial = _clean(entry.serial)
     if not _says(serial) or serial not in {_clean(item.serial) for item in order.items if _says(item.serial)}:
-        raise ValueError(f"Warranty registration {registration_id} is for a serial number that isn't on order "
+        raise NoFileDue(f"Warranty registration {registration_id} is for a serial number that isn't on order "
                          f"#{_clean(order.number)}.")
     history = _orders_of(store, order)
     scan, delivery = _delivery(store, order)
@@ -384,7 +394,7 @@ def _amount(order: Order) -> str:
             context.prec = MAX_PREC  # Order.amount adds up in the current context
             amount = order.amount
     except ArithmeticError:  # a signalling NaN in a price can't even be added up
-        raise ValueError(NOT_A_NUMBER) from None
+        raise PersonWritesFile(NOT_A_NUMBER) from None
     return _money(order.currency, amount)
 
 
@@ -395,7 +405,7 @@ def _money(currency: object, amount: Decimal) -> str:
     except ArithmeticError:  # past decimal's range
         places = None
     if places is None:
-        raise ValueError(NOT_A_NUMBER)
+        raise PersonWritesFile(NOT_A_NUMBER)
     return f"{_clean(currency)} {amount:,.{places}f}"
 
 
@@ -508,11 +518,11 @@ def _check(text: object) -> None:
     if not isinstance(text, str):
         raise TypeError("A document holds text only.")
     if text != _clean(text) or any(unicodedata.category(char).startswith("C") for char in text):
-        raise ValueError(CANT_SHOW)
+        raise PersonWritesFile(CANT_SHOW)
     try:
         text.encode("cp1252")
     except UnicodeEncodeError:
-        raise ValueError(CANT_SHOW) from None
+        raise PersonWritesFile(CANT_SHOW) from None
 
 
 # ----------------------------------------------------------------------------- the PDF
@@ -520,7 +530,7 @@ def _pdf(title: str, lines: tuple[str, ...]) -> bytes:
     """US Letter pages: the title, then each paragraph wrapped to the margins, and a page number at the foot."""
     characters = len(title) + sum(map(len, lines))  # each takes a byte of the file at least, and each row takes more
     if characters > MAX_PDF_BYTES:  # so it can't fit, and laying it out first would only take time
-        raise ValueError(f"The file would be more than {characters:,} bytes, over the {MAX_PDF_BYTES:,} Visa takes.")
+        raise PersonWritesFile(f"The file would be more than {characters:,} bytes, over the {MAX_PDF_BYTES:,} Visa takes.")
     width = PAGE_WIDTH - 2 * MARGIN
     rows = [(TITLE, 0.0, row) for row in _wrap(title, TITLE[0], width)] + [(TEXT, 0.0, "")]
     for line in lines:
@@ -560,7 +570,7 @@ def _pdf(title: str, lines: tuple[str, ...]) -> bytes:
     out += b"".join(b"%010d 00000 n \n" % offset for offset in offsets)  # each entry is exactly 20 bytes
     out += b"trailer\n<< /Size %d /Root 1 0 R >>\nstartxref\n%d\n%%%%EOF\n" % (len(objects) + 1, xref)
     if len(out) > MAX_PDF_BYTES:
-        raise ValueError(f"The file would be {len(out):,} bytes, over the {MAX_PDF_BYTES:,} Visa takes.")
+        raise PersonWritesFile(f"The file would be {len(out):,} bytes, over the {MAX_PDF_BYTES:,} Visa takes.")
     return bytes(out)
 
 
@@ -623,3 +633,19 @@ def _escaped(text: str) -> bytes:
         else:
             out += b"\\%03o" % byte
     return bytes(out)
+
+
+# ----------------------------------------------------------------------------- read the same way elsewhere
+# The Claude layer's rules read a value as the files do, so a rule and a file never disagree about what a record says.
+clean, says, key, address, digits = _clean, _says, _key, _address, _digits
+device, ip, utc, nobody = _device, _ip, _utc, _nobody
+
+
+def delivery_scan(store: Store, order: Order) -> Scan | None:
+    """The carrier's last delivery of the order, the one the files show, or None when it has none."""
+    return _delivery(store, order)[0]
+
+
+def signer(value: object) -> str | None:
+    """Who signed, as the files show it, or None: a blank, a placeholder and a carrier's words for nobody name no one."""
+    return _clean(value) if _says(value) and not _nobody(value) else None

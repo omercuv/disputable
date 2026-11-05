@@ -26,7 +26,7 @@ from typing import Iterable, Mapping
 
 from disputable.engine import Action, Dispute, Evidence
 from disputable.fees import ZERO, EvidenceClass, usd
-from disputable.store import Case, Order, Store
+from disputable.store import BLANKS, Case, Order, Store, says_nothing  # the files and the reader read the blanks here
 
 FRAUD_CLAIM = "10.4"  # card-absent fraud, the only claim CE 3.0 covers
 NEWEST, OLDEST = 120, 365  # how many days before the dispute an earlier order may be placed, both ends included
@@ -35,14 +35,7 @@ ELEMENTS = {"account": "account_id", "address": "shipping_address", "device": "d
 NAMES = {"account": "account", "address": "delivery address", "device": "device", "ip": "IP"}
 # Each earlier order must match on one of these: two elements, one of them device or IP.
 PAIRS = tuple(frozenset(pair) for pair in combinations(ELEMENTS, 2) if {"device", "ip"} & set(pair))
-# Values that say nothing, so they can't match: what stores and scripts write when a field is empty ("0" for a guest's
-# account; "localhost", and the other names Linux hosts files give it, for the server's own name). A value is read as its
-# letters and digits, so case and punctuation don't hide one ("N/A.", "(none)"), a value with none ("--") is blank, and so
-# are placeholders joined ("None, None").
-PLACEHOLDERS = frozenset({"unknown", "n/a", "na", "none", "null", "nil", "undefined", "not set", "(not set)", "guest", "-",
-                          "0", "localhost", "localhost.localdomain", "localhost4", "localhost4.localdomain4", "localhost6",
-                          "localhost6.localdomain6", "ip6-localhost", "ip6-loopback"})
-BLANKS = frozenset(re.sub(r"[\W_]+", "", phrase) for phrase in PLACEHOLDERS)  # joined up: "notset", and "-" is ""
+# Values that say nothing can't match. store.says_nothing() reads them, from store.PLACEHOLDERS.
 # Private and shared ranges: a proxy or a load balancer in front of the store has one, and its address is logged for every
 # buyer. Not Python's is_private, which also holds the documentation ranges that made-up records give their buyers.
 PROXY_RANGES = tuple(map(ipaddress.ip_network, ("10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16", "100.64.0.0/10",
@@ -377,17 +370,6 @@ def _facts(prior: Prior) -> list[str]:
     return facts
 
 
-def says_nothing(value: str | None) -> bool:
-    """Whether a value is a blank or a placeholder, however it's written: "N/A.", "(none)" and "--" say nothing, and so
-    does a value whose every part is one, such as "None, None, None" (empty address fields joined)."""
-    text = (value or "").casefold()
-    return _joined(text) in BLANKS or all(_joined(part) in BLANKS for part in re.split(r"[\s,;]+", text))
-
-
-def _joined(text: str) -> str:
-    return "".join(re.findall(r"[^\W_]+", text))
-
-
 def ip_says_nothing(address: ipaddress.IPv4Address | ipaddress.IPv6Address) -> bool:
     """Whether an IP is no buyer's: unspecified, the server's own (loopback), the network's own (link-local), or a
     proxy's or a load balancer's (PROXY_RANGES). An IPv4 address written as IPv6 (::ffff:) comes in unwrapped."""
@@ -502,3 +484,7 @@ def _about(numbers: list[str], one: str, many: str) -> str:
 def _join(items: Iterable[str]) -> str:
     items = list(items)
     return ", ".join(items[:-1]) + f" and {items[-1]}" if len(items) > 1 else "".join(items)
+
+
+# Public names for the Claude layer: it cleans a tag and tells a later round exactly as the check does.
+order_number, later_round = _order_number, _later_round
