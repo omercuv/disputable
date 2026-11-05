@@ -7,7 +7,7 @@ from itertools import combinations, product
 
 import pytest
 
-from disputable.ce3 import ELEMENTS, NEWEST, OLDEST, READINGS, Outcome, check, consulted, evidence
+from disputable.ce3 import ELEMENTS, NEWEST, OLDEST, READINGS, Outcome, check, consulted, evidence, says_nothing
 from disputable.engine import Action, Evidence, Stage, decide
 from disputable.fees import EvidenceClass, money
 from disputable.seed.fernhill import ANSWERS, ENDING_2, ENDING_2_ANSWER, FERNHILL, MONDAY, THREE_WEEKS_LATER
@@ -236,7 +236,8 @@ def test_the_card_decides_not_the_customer():
                                   "earlier orders by card, not by customer.")
 
 
-@pytest.mark.parametrize("card", ["", "  ", "unknown", "UNKNOWN", "N/A", "null", "-", "(not set)"])
+@pytest.mark.parametrize("card", ["", "  ", "unknown", "UNKNOWN", "N/A", "null", "-", "(not set)",
+                                  "N/A.", "(none)", "#N/A", "--", "—", "?"])  # a placeholder however it's written
 def test_an_order_with_no_card_on_file_has_no_earlier_orders_on_it(card):
     result = run([(200, {"card_fingerprint": card}), (300, {"card_fingerprint": card})], disputed={"card_fingerprint": card})
     assert result.outcome is FAIL
@@ -252,7 +253,7 @@ def test_earlier_orders_with_a_card_arent_called_another_card_when_the_disputed_
                               "to its card.",)
 
 
-@pytest.mark.parametrize("card", ["", "unknown", "N/A"])
+@pytest.mark.parametrize("card", ["", "unknown", "N/A", "(none)", "--"])
 def test_an_earlier_order_with_no_card_on_file_isnt_on_this_card(card):
     result = run([(200, {}), (300, {}), (250, {"card_fingerprint": card}), (260, {"card_fingerprint": card})])
     assert [prior.order.number for prior in result.priors] == ["1002", "1001"]
@@ -326,10 +327,17 @@ def test_the_elements_read_the_orders_own_fields():
     assert result.priors[0].matches == {"address", "ip"}
 
 
-BLANKS = {"account": ["", "  ", "unknown", "N/A", "na", "null", "guest", "not set"],
-          "address": ["", "  ", "unknown", " None ", "(not set)"],
-          "device": ["", "unknown", "undefined", "00000000-0000-0000-0000-000000000000"],
-          "ip": ["", "-", "nil", "0.0.0.0", "::"]}
+BLANKS = {"account": ["", "  ", "unknown", "N/A", "na", "null", "guest", "not set", "N/A.", "0"],  # "0": a guest's account
+          "address": ["", "  ", "unknown", " None ", "(not set)", "#N/A", "None, None, None", "N/A, N/A", "None None None"],
+          "device": ["", "unknown", "undefined", "00000000-0000-0000-0000-000000000000", "(none)", "--", "0"],
+          # A loopback or link-local IP is the server's or the network's own, logged behind a proxy: no buyer's address.
+          "ip": ["", "-", "nil", "0.0.0.0", "::", "127.0.0.1", "::1", "::ffff:127.0.0.1", "169.254.10.20", "fe80::1",
+                 # So is a private or shared one: a proxy's or a load balancer's (Docker's bridge, a cloud network's).
+                 "10.0.0.5", "172.17.0.1", "172.31.255.254", "192.168.1.10", "100.64.0.1", "100.127.255.254", "fd00::1",
+                 "::ffff:10.0.0.5", "10.0.0.5.", "0", "localhost",
+                 # And the server's other names in Linux hosts files: a reverse lookup of 127.0.0.1 or ::1 can give one.
+                 "localhost.localdomain", "localhost4", "localhost4.localdomain4", "localhost6", "localhost6.localdomain6",
+                 "ip6-localhost", "ip6-loopback", "LocalHost.LocalDomain."]}
 
 
 @pytest.mark.parametrize("element, blank", [(element, blank) for element, blanks in BLANKS.items() for blank in blanks])
@@ -341,6 +349,13 @@ def test_two_blanks_are_not_a_match(element, blank):
     assert [prior.matches for prior in result.priors] == [{partner}, {partner}]
 
 
+@pytest.mark.parametrize("ip", ["192.0.2.86", "198.51.100.1", "203.0.113.7", "2001:db8::1", "::ffff:203.0.113.7"])
+def test_a_documentation_ip_still_matches(ip):
+    # Made-up buyers have these. Python's is_private holds them too, so it can't be what says a proxy's IP is no buyer's.
+    result = run([(200, {"ip_address": ip}), (300, {"ip_address": ip})], disputed={"ip_address": ip})
+    assert [prior.matches for prior in result.priors] == [set(ELEMENTS)] * 2
+
+
 @pytest.mark.parametrize("element, ours, theirs, same", [
     ("address", "1 Sample Street, San Francisco, CA 94103, US", " 1  SAMPLE street, San Francisco, CA 94103, US", True),
     ("address", "1 Sample Street, San Francisco, CA 94103, US", "1 Sample St, San Francisco, CA 94103, US", False),
@@ -349,6 +364,8 @@ def test_two_blanks_are_not_a_match(element, blank):
     ("ip", "203.0.113.7", "::ffff:203.0.113.7", True),
     ("ip", "203.0.113.7", " 203.0.113.7 ", True),
     ("ip", "203.0.113.7", "203.0.113.70", False),
+    ("ip", "203.0.113.7", "203.0.113.7.", True),  # a full stop left after it, as when it's cut from a sentence
+    ("device", "59ec5db9-399c-4043-9a6c-fcd1a48d99aa", "59ec5db9-399c-4043-9a6c-fcd1a48d99aa.", True),
     ("ip", "203.0.113.7, 10.0.0.1", "203.0.113.7, 10.0.0.1", True),  # not one address: compared as written
     ("ip", "ip-a", "IP-A", False),
     ("device", "59ec5db9-399c-4043-9a6c-fcd1a48d99aa", "59EC5DB9-399C-4043-9A6C-FCD1A48D99AA", True),  # a UUID's case
@@ -850,7 +867,7 @@ def test_a_pass_on_a_card_that_isnt_visa_needs_a_person():
     assert run([(200, {})], disputed={"card_brand": "mastercard"}).outcome is FAIL
 
 
-@pytest.mark.parametrize("brand", ["", "  ", "unknown", "N/A"])
+@pytest.mark.parametrize("brand", ["", "  ", "unknown", "N/A", "N/A.", "--"])
 def test_a_pass_on_a_card_of_unknown_brand_needs_a_person(brand):
     result = run([(200, {}), (300, {})], disputed={"card_brand": brand})
     assert result.outcome is UNCLEAR
@@ -1013,6 +1030,28 @@ def test_where_an_order_falls_in_the_window(priors, gap, words):
 def test_a_blank_on_the_disputed_order_is_named(field, name, blank):
     result = run([(200, {}), (300, {})], disputed={field: blank})
     assert result.reasons[-1] == f"The disputed order has no {name} on file, so nothing can match on it."
+
+
+@pytest.mark.parametrize("field, value, says", [
+    ("ip_address", "10.0.0.5", "The disputed order's IP on file isn't a buyer's address, such as a proxy's or the server's "
+                               "own, so nothing can match on it."),
+    ("device_id", "00000000-0000-0000-0000-000000000000", "The disputed order's device on file is all zeros, so nothing "
+                                                          "can match on it."),
+], ids=["a proxy's IP", "a device of zeros"])
+def test_a_value_that_is_no_buyers_is_named_as_such(field, value, says):
+    # It's on file, so "no IP on file" would send the person looking for missing data, not at the proxy that logged it.
+    assert run([(200, {}), (300, {})], disputed={field: value}).reasons[-1] == says
+
+
+@pytest.mark.parametrize("value", ["0", "localhost", "None, None, None", "N/A, N/A", "None None None", "?", "--", "N/A."])
+def test_placeholders_joined_or_written_another_way_say_nothing(value):
+    assert says_nothing(value)
+
+
+@pytest.mark.parametrize("value", ["Nil Yilmaz", "Nana", "0008", "Guest House, Bath", "203.0.113.7, 10.0.0.1", "NA LEE",
+                                   "J. GUEST", "0 Main Street", "root@localhost.localdomain", "Localhost Ltd"])
+def test_a_real_value_that_holds_a_placeholder_word_still_says_something(value):
+    assert not says_nothing(value)
 
 
 # ----------------------------------------------------------------------------- the same rules, worked out another way

@@ -6,8 +6,11 @@ each case's due_in, and the records keep these dates.
 
 from __future__ import annotations
 
+from dataclasses import replace
 from datetime import datetime, timedelta, timezone
 
+from disputable import ce3
+from disputable.documents import purchase_history, warranty_registration
 from disputable.engine import Action, Stage
 from disputable.fees import EvidenceClass, money
 from disputable.seed.answers import Answer, Fact
@@ -91,12 +94,8 @@ WARRANTY_SIGN_UP = WarrantyRegistration(
 
 REJECTION_COMMENT = "Order #1038 has a Visa fraud report (TC40) from May; CE 3.0 not met."
 THE_BANKS_REASON = Fact("headphones_round_2", "Order #1038 has a Visa fraud report (TC40) from May")
-FIRST_PACKAGE_FILE = "first-package-file"  # the real SHA-256 comes from the PDF step
-SECOND_PACKAGE_FILE = "second-package-file"
-FIRST_PACKAGE_FACTS = frozenset({PRIOR_ORDER_1012.id, PRIOR_ORDER_1038.id, PRIOR_ORDER_1077.id, HEADPHONES_ORDER.id,
-                                 "scan-1109-delivered"})
 
-FERNHILL = Store(
+_RECORDS = Store(
     customers=(JAMIE, ROBIN, ALEX),
     orders=(PRIOR_ORDER_1012, PRIOR_ORDER_1038, PRIOR_ORDER_1077, EARBUDS_ORDER, HEADPHONES_ORDER, EAR_TIPS_ORDER),
     scans=(
@@ -110,18 +109,29 @@ FERNHILL = Store(
     ),
     emails=EARBUDS_EMAILS,
     warranty=(WARRANTY_SIGN_UP,),
-    cases=(
-        Case("ear_tips", "1121", "13.1", Stage.RFI, datetime(2026, 10, 27, 8, 0, tzinfo=timezone.utc),
-             timedelta(days=2), "Cardholder says the ear tips never arrived."),
-        Case("earbuds", "1098", "13.6", Stage.CHARGEBACK, CHARGEBACK_OPENED_AT,
-             timedelta(days=4), "Cardholder returned the earbuds; no credit was processed."),
-        Case("headphones", "1109", "10.4", Stage.RFI, datetime(2026, 10, 28, 8, 0, tzinfo=timezone.utc),
-             timedelta(days=6), "Cardholder does not recognise this card-absent transaction."),
-        Case("headphones_round_2", "1109", "10.4", Stage.CHARGEBACK, THREE_WEEKS_LATER,
-             timedelta(days=7), REJECTION_COMMENT, prior_challenges=1,
-             rejected_fact_ids=FIRST_PACKAGE_FACTS, rejected_file_hashes=frozenset({FIRST_PACKAGE_FILE})),
-    ),
 )
+_HEADPHONES = Case("headphones", "1109", "10.4", Stage.RFI, datetime(2026, 10, 28, 8, 0, tzinfo=timezone.utc),
+                   timedelta(days=6), "Cardholder does not recognise this card-absent transaction.")
+
+# The files the headphones' two challenges send, built from the records as the app builds them, so the file the bank
+# rejects in round two is the one round one sent. Ending 2 has no sign-up, so it has no second file.
+FIRST_PACKAGE = purchase_history(_RECORDS, _HEADPHONES, ce3.check(_RECORDS, _HEADPHONES))
+SECOND_PACKAGE = warranty_registration(_RECORDS, _HEADPHONES, WARRANTY_SIGN_UP.id)
+FIRST_PACKAGE_FILE = FIRST_PACKAGE.sha256
+SECOND_PACKAGE_FILE = SECOND_PACKAGE.sha256
+FIRST_PACKAGE_FACTS = frozenset({PRIOR_ORDER_1012.id, PRIOR_ORDER_1038.id, PRIOR_ORDER_1077.id, HEADPHONES_ORDER.id,
+                                 "scan-1109-delivered"})
+
+FERNHILL = replace(_RECORDS, cases=(
+    Case("ear_tips", "1121", "13.1", Stage.RFI, datetime(2026, 10, 27, 8, 0, tzinfo=timezone.utc),
+         timedelta(days=2), "Cardholder says the ear tips never arrived."),
+    Case("earbuds", "1098", "13.6", Stage.CHARGEBACK, CHARGEBACK_OPENED_AT,
+         timedelta(days=4), "Cardholder returned the earbuds; no credit was processed."),
+    _HEADPHONES,
+    Case("headphones_round_2", "1109", "10.4", Stage.CHARGEBACK, THREE_WEEKS_LATER,
+         timedelta(days=7), REJECTION_COMMENT, prior_challenges=1,
+         rejected_fact_ids=FIRST_PACKAGE_FACTS, rejected_file_hashes=frozenset({FIRST_PACKAGE_FILE})),
+))
 ENDING_2 = FERNHILL.without_warranty()
 
 ANSWERS = {

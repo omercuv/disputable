@@ -35,8 +35,18 @@ ELEMENTS = {"account": "account_id", "address": "shipping_address", "device": "d
 NAMES = {"account": "account", "address": "delivery address", "device": "device", "ip": "IP"}
 # Each earlier order must match on one of these: two elements, one of them device or IP.
 PAIRS = tuple(frozenset(pair) for pair in combinations(ELEMENTS, 2) if {"device", "ip"} & set(pair))
-# Values that say nothing, so they can't match: what stores and scripts write when a field is empty.
-PLACEHOLDERS = frozenset({"unknown", "n/a", "na", "none", "null", "nil", "undefined", "not set", "(not set)", "guest", "-"})
+# Values that say nothing, so they can't match: what stores and scripts write when a field is empty ("0" for a guest's
+# account; "localhost", and the other names Linux hosts files give it, for the server's own name). A value is read as its
+# letters and digits, so case and punctuation don't hide one ("N/A.", "(none)"), a value with none ("--") is blank, and so
+# are placeholders joined ("None, None").
+PLACEHOLDERS = frozenset({"unknown", "n/a", "na", "none", "null", "nil", "undefined", "not set", "(not set)", "guest", "-",
+                          "0", "localhost", "localhost.localdomain", "localhost4", "localhost4.localdomain4", "localhost6",
+                          "localhost6.localdomain6", "ip6-localhost", "ip6-loopback"})
+BLANKS = frozenset(re.sub(r"[\W_]+", "", phrase) for phrase in PLACEHOLDERS)  # joined up: "notset", and "-" is ""
+# Private and shared ranges: a proxy or a load balancer in front of the store has one, and its address is logged for every
+# buyer. Not Python's is_private, which also holds the documentation ranges that made-up records give their buyers.
+PROXY_RANGES = tuple(map(ipaddress.ip_network, ("10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16", "100.64.0.0/10",
+                                                 "fc00::/7")))
 ORDER_NUMBER = re.compile(r"[0-9A-Za-z][0-9A-Za-z-]{0,23}")  # anything else isn't repeated back to the person
 MONTH = (r"(?:jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|june?|july?|aug(?:ust)?|sep(?:t(?:ember)?)?|oct(?:ober)?"
          r"|nov(?:ember)?|dec(?:ember)?)\.?")
@@ -173,8 +183,8 @@ def check(store: Store, case: Case, reported: Iterable[str] | None = ()) -> Ce3R
         reasons.append(_about(others, "was placed by another customer with this card.",
                               "were placed by another customer with this card.")
                        + " CE 3.0 finds earlier orders by card, not by customer.")
-    reasons += [f"The disputed order has no {NAMES[element]} on file, so nothing can match on it."
-                for element, field in ELEMENTS.items() if not _comparable(element, getattr(disputed, field))]
+    reasons += [_no_match(element, getattr(disputed, field)) for element, field in ELEMENTS.items()
+                if not _comparable(element, getattr(disputed, field))]
     if outcome is Outcome.FAIL:
         reasons += problems
     on_card = {prior.order.number for prior in priors}
@@ -186,7 +196,8 @@ def evidence(result: Ce3Result, dispute: Dispute | Case, file_hashes: frozenset[
     """What the check alone gives the engine. An unclear result is drafted as a fight, and its conflicts send it to a person.
 
     Visa allows one CE 3.0 attempt, and the first round is when it's sent, so a later round gets nothing from it. Pass
-    lifecycle.as_case(), which counts any later round, even one after an RFI nobody answered.
+    lifecycle.as_case(), which counts any later round, even one after an RFI nobody answered. A file's hash alone leaves
+    out the records the file proves, such as its delivery scan: add the files with documents.with_files().
     """
     if result.outcome is Outcome.FAIL or _later_round(dispute):
         return Evidence(EvidenceClass.NONE)
@@ -227,7 +238,7 @@ def _problems(disputed: Order, priors: tuple[Prior, ...], given: set[str], named
     lines += [f"The bank's comment names order #{number}, an earlier order on this card, but it isn't flagged as reported."
               for number in sorted(on_card - named) if _names(words, number)]
     brand = disputed.card_brand.strip().casefold()
-    if not brand or brand in PLACEHOLDERS:
+    if says_nothing(brand):
         lines.append("The claim is under Visa's rules, but the store's records don't show the card's brand.")
     elif not brand.startswith("visa"):
         lines.append("The claim is under Visa's rules, but this order wasn't paid with a Visa card.")
@@ -366,10 +377,28 @@ def _facts(prior: Prior) -> list[str]:
     return facts
 
 
+def says_nothing(value: str | None) -> bool:
+    """Whether a value is a blank or a placeholder, however it's written: "N/A.", "(none)" and "--" say nothing, and so
+    does a value whose every part is one, such as "None, None, None" (empty address fields joined)."""
+    text = (value or "").casefold()
+    return _joined(text) in BLANKS or all(_joined(part) in BLANKS for part in re.split(r"[\s,;]+", text))
+
+
+def _joined(text: str) -> str:
+    return "".join(re.findall(r"[^\W_]+", text))
+
+
+def ip_says_nothing(address: ipaddress.IPv4Address | ipaddress.IPv6Address) -> bool:
+    """Whether an IP is no buyer's: unspecified, the server's own (loopback), the network's own (link-local), or a
+    proxy's or a load balancer's (PROXY_RANGES). An IPv4 address written as IPv6 (::ffff:) comes in unwrapped."""
+    return (address.is_unspecified or address.is_loopback or address.is_link_local
+            or any(address in network for network in PROXY_RANGES))
+
+
 def _card(order: Order) -> str:
     """The card's fingerprint, or "" when it says nothing."""
     card = order.card_fingerprint.strip()
-    return "" if card.casefold() in PLACEHOLDERS else card
+    return "" if says_nothing(card) else card
 
 
 def _same_card(order: Order, disputed: Order) -> bool:
@@ -383,21 +412,30 @@ def _matches(order: Order, disputed: Order) -> frozenset[str]:
                      and value == _comparable(element, getattr(disputed, field)))
 
 
+def _no_match(element: str, value: str | None) -> str:
+    """Why nothing can match on the disputed order's element: nothing on file, or a value that's no buyer's."""
+    if says_nothing(value):
+        return f"The disputed order has no {NAMES[element]} on file, so nothing can match on it."
+    why = "isn't a buyer's address, such as a proxy's or the server's own" if element == "ip" else "is all zeros"
+    return f"The disputed order's {NAMES[element]} on file {why}, so nothing can match on it."
+
+
 def _comparable(element: str, value: str | None) -> str:
     """A value as it's compared, or "" when it says nothing. Only spacing, an address's letter case and how an IP or a UUID
-    is written are ignored."""
+    is written are ignored, and a full stop or a mark left after one. An IP that's no buyer's (ip_says_nothing) says
+    nothing, like an unspecified one."""
     text = " ".join((value or "").split()) if element == "address" else (value or "").strip()
-    if text.casefold() in PLACEHOLDERS:
+    if says_nothing(text):
         return ""
     if element == "address":
         return text.casefold()
     try:
         if element == "ip":
-            address = ipaddress.ip_address(text)
+            address = ipaddress.ip_address(text.rstrip(".!?"))  # "203.0.113.7." is that IP, cut from a sentence
             address = getattr(address, "ipv4_mapped", None) or address
-            return "" if address.is_unspecified else str(address)
+            return "" if ip_says_nothing(address) else str(address)
         if element == "device":
-            device = uuid.UUID(text)
+            device = uuid.UUID(text.rstrip(".!?"))
             return "" if device.int == 0 else str(device)
     except ValueError:
         pass
@@ -433,12 +471,15 @@ def _order_number(text: str) -> str:
 
 
 def _refunded(order: Order) -> str:
-    total = sum((refund.amount for refund in order.refunds), ZERO)
-    if not total.is_finite():
-        return "refunded"
-    if total >= order.amount:
-        return f"refunded in full ({usd(total)})"
-    return f"partly refunded ({usd(total)} of {usd(order.amount)})"
+    """How much of the order was refunded, or just "refunded" when an amount isn't a number that can be compared."""
+    try:
+        total, amount = sum((refund.amount for refund in order.refunds), ZERO), order.amount
+        if total.is_finite() and amount.is_finite():
+            return (f"refunded in full ({usd(total)})" if total >= amount
+                    else f"partly refunded ({usd(total)} of {usd(amount)})")
+    except ArithmeticError:  # a signalling NaN can't even be added up, nor a number past decimal's range be rounded
+        pass
+    return "refunded"
 
 
 def _days_text(days: int) -> str:

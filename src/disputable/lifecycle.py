@@ -49,6 +49,8 @@ OTHER_REFUNDS = "The payment shows refunds this app didn't make. A person books 
 LATE_REFUND = "This app's RFI refund shows now, and this app booked it. A person checks that it isn't booked twice."
 HELD = ("The payment showed a new refund while this app's response was being sent. It may be this response's own, so it "
         "isn't sent again.")
+LANDED = ("Airwallex showed the bank deciding while this app's challenge was being sent, so the bank has it or another "
+          "response. CE 3.0's one attempt counts as used.")
 CLOCK_BACK = "This app's clock went back, but Airwallex's dates say this reading is newer. A person checks it."
 OLDER_COPY = "Airwallex returned an older copy of this dispute than one this app read before. A person checks it."
 FUTURE = "Airwallex dated this dispute after this app read it, so newer copies would look older. A person checks it."
@@ -357,12 +359,20 @@ def as_dispute(record: CaseRecord) -> Dispute:
 
 def as_case(record: CaseRecord) -> Case:
     """The current round as the CE 3.0 check and the Claude layer read it. Days count from the first round's date, as
-    Visa's do, and any later round has used Visa's single CE 3.0 attempt: pass it to ce3.consulted() and ce3.evidence().
-    Its prior_challenges counts that attempt; as_dispute() has the challenges Airwallex really shows."""
-    d, last = as_dispute(record), record.last
+    Visa's do, and any later round has used Visa's single CE 3.0 attempt: pass it to ce3.consulted(), ce3.evidence() and
+    the documents builders. Its prior_challenges counts that attempt and every challenge but this round's own while it's
+    being sent, so its file can be built again for the upload, a retry or a person after a refused POST. Once Airwallex
+    took it, it shows on the dispute behind any reply, or a reading showed the bank deciding on it (LANDED), the bank has
+    it. as_dispute() has the count Airwallex shows."""
+    d, last, current = as_dispute(record), record.last, record.rounds[-1]
+    plan = current.plan
+    shown = any(_is_ours(reply, plan) and reply.stage is current.stage
+                for reply in (*last.replies, *((current.reply,) if current.reply else ())))
+    own = int(_sent(plan) and plan.terms.action is Action.CHALLENGE and not plan.taken_at and not shown
+              and LANDED not in current.notes)
     return Case(d.id, last.order_number or "", d.reason_code, d.stage, record.opened_at, d.due_at - last.at,
                 last.issuer_comment, amount=d.amount, status=d.status,
-                prior_challenges=max(d.prior_challenges, len(record.rounds) - 1),
+                prior_challenges=max(d.prior_challenges - own, len(record.rounds) - 1),
                 ai_automation_challenged=d.ai_automation_challenged, rejected_fact_ids=d.rejected_fact_ids,
                 rejected_file_hashes=d.rejected_file_hashes)
 
@@ -723,6 +733,9 @@ def _check_plan(before: CaseRecord, record: CaseRecord, reading: Reading) -> Cas
         waits = d.stage is plan.terms.stage and (asks or d.status in WAITING)
         if maybe_ours and waits and not plan.taken_at:  # or someone else's of the same size: code can't tell them apart
             return _note(record, HELD)  # blocker() holds every retry, so a reading that shows less later can't lift it
+        if plan.terms.action is Action.CHALLENGE and d.stage is plan.terms.stage and d.status in WAITING \
+                and not plan.taken_at:  # it landed with its 2xx lost, or another response did: kept, as HELD is
+            return _note(record, LANDED)
         return record
     if reading.issuer_comment != old.issuer_comment:  # the evidence was read against the bank's words
         news.append("the bank's comment changed")

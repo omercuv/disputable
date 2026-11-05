@@ -1,0 +1,4 @@
+# Bytes, not text. A PDF's cross-reference table holds byte offsets, so a line-ending change breaks the file. With
+# core.autocrlf, git would make one on checkout and in git archive: a PDF has no NUL byte, so git takes it for text.
+*.pdf binary
+*.jpg binary

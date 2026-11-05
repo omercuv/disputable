@@ -14,6 +14,7 @@ from pathlib import Path
 import pytest
 
 from disputable import ce3, lifecycle
+from disputable.documents import purchase_history
 from disputable.engine import Action, Evidence, Stage, Status, decide
 from disputable.fees import ZERO, EvidenceClass, money
 from disputable.jsonable import Unloadable, canonical, dump
@@ -445,6 +446,122 @@ def test_a_chargeback_after_an_rfi_nobody_answered_has_used_ce3():
     package = Evidence(EvidenceClass.CE3_QUALIFIED, FIRST_PACKAGE_FACTS, frozenset({FIRST_PACKAGE_FILE}))
     with pytest.raises(Refused, match=ONE_CE3_ATTEMPT):
         keep(record, package, MONDAY + timedelta(days=7), round_number=2)
+
+
+def test_round_ones_own_challenge_leaves_the_case_in_round_one():
+    # From sending() on, round one is still round one: its file is built again for the upload, a retry after a restart or
+    # a person after a refused POST, and gets the plan's own hash. Someone else's challenge still uses the attempt.
+    story = being_sent()
+    record = story["headphones"]
+    plan = record.rounds[-1].plan
+    failed = send_failed(record, plan.request_id, "invalid_argument: the file was refused.", MONDAY + MINUTE)
+    for each in (record, failed):
+        case = as_case(each)
+        assert len(each.rounds) == 1 and case.prior_challenges == 0
+        result = ce3.check(FERNHILL, case)
+        assert result.reasons[0] == "CE 3.0 is met, as far as the store's records show."
+        assert plan.terms.file_hashes == {purchase_history(FERNHILL, case, result).sha256} == {FIRST_PACKAGE_FILE}
+    story.sandbox.reply("dst_headphones", Action.CHALLENGE, SOMEONE, "PURCHASE_HISTORY")
+    story.poll(MONDAY + 2 * MINUTE)
+    assert as_case(story["headphones"]).prior_challenges == 1  # someone else's, beside this app's own
+
+
+def test_only_this_rounds_own_sent_challenge_is_left_out():
+    # Someone else's challenge uses the attempt beside an accept this app sent: that's no challenge of its own to leave
+    # out. (Beside a plan never sent, it can't miscount: poll() drops such a plan when someone else's challenge shows.)
+    story = Story(cases=("headphones",))
+    story.poll(MONDAY)
+    story.decide(MONDAY)
+    story.sandbox.reply("dst_headphones", Action.CHALLENGE, SOMEONE, "PURCHASE_HISTORY")
+    story.poll(MONDAY + MINUTE)
+    assert story["headphones"].rounds[-1].plan is None and as_case(story["headphones"]).prior_challenges == 1
+    story = being_sent("ear_tips")
+    assert story["ear_tips"].rounds[-1].plan.terms.action is Action.ACCEPT
+    story.sandbox.reply("dst_ear_tips", Action.CHALLENGE, SOMEONE, "PRODUCT_NOT_RECEIVED")
+    story.poll(MONDAY + 2 * MINUTE)
+    assert as_case(story["ear_tips"]).prior_challenges == 1
+
+
+def test_round_ones_challenge_uses_the_attempt_once_it_shows():
+    # Once this app's challenge shows, the bank has the attempt, though the case is still in round one: a person who
+    # handles the round, say when the bank asks again at the same stage, isn't told CE 3.0 can be sent or handed its file.
+    story = being_sent()
+    record = story["headphones"]
+    story.sandbox.post(record)
+    story.records["dst_headphones"] = taken(record, record.rounds[-1].plan.request_id, MONDAY + MINUTE)
+    story.poll(MONDAY + 2 * MINUTE)
+    shown = story["headphones"]
+    story.sandbox.change("dst_headphones", status="REQUIRES_RESPONSE", due_at=(MONDAY + timedelta(days=9)).isoformat())
+    story.poll(MONDAY + 3 * MINUTE)
+    asked = story["headphones"]
+    assert (phase(shown), phase(asked)) == (Phase.WAIT, Phase.PERSON)
+    for each in (shown, asked):
+        case = as_case(each)
+        assert len(each.rounds) == 1 and each.rounds[-1].reply.by == ACTOR and case.prior_challenges == 1
+        result = ce3.check(FERNHILL, case)
+        assert "it can't be sent: Visa allows one CE 3.0 attempt" in result.reasons[0]
+        assert not ce3.consulted(case, Action.GATHER_EVIDENCE, [])
+        assert ce3.evidence(result, case).evidence_class is EvidenceClass.NONE
+        with pytest.raises(ValueError, match="^Visa allows one CE 3.0 attempt"):
+            purchase_history(FERNHILL, case, result)
+    # Someone else's accept isn't this app's challenge showing, so the file can still be built for a person.
+    story = being_sent()
+    story.sandbox.reply("dst_headphones", Action.ACCEPT, SOMEONE, "OTHER")
+    story.poll(MONDAY + 2 * MINUTE)
+    assert story["headphones"].rounds[-1].reply.by == SOMEONE and as_case(story["headphones"]).prior_challenges == 0
+
+
+def test_round_ones_challenge_uses_the_attempt_once_a_reading_shows_the_bank_deciding_on_it():
+    # The POST landed, but its 2xx was lost and the entry lags: the next GET shows RFI/CHALLENGED. The bank has the attempt,
+    # so a person who handles the round, here when the bank asks again after the deadline, isn't told CE 3.0 can be sent
+    # or handed its file. A POST that may never have landed still leaves the round in round one, for the retry.
+    story = being_sent()
+    story.sandbox.post(story["headphones"], show=False)
+    story.poll(MONDAY + 2 * MINUTE)
+    landed = story["headphones"]
+    later = MONDAY + timedelta(days=7)
+    story.sandbox.change("dst_headphones", status="REQUIRES_RESPONSE", due_at=(later + timedelta(days=9)).isoformat())
+    story.poll(later)
+    asked = story["headphones"]
+    assert (phase(landed), phase(asked)) == (Phase.SENT, Phase.PERSON)
+    for each in (landed, asked):
+        case = as_case(each)
+        assert len(each.rounds) == 1 and not each.last.replies and not each.rounds[-1].plan.taken_at
+        assert lifecycle.LANDED in each.rounds[-1].notes and case.prior_challenges == 1
+        result = ce3.check(FERNHILL, case)
+        assert "it can't be sent: Visa allows one CE 3.0 attempt" in result.reasons[0]
+        assert not ce3.consulted(case, Action.GATHER_EVIDENCE, [])
+        assert ce3.evidence(result, case).evidence_class is EvidenceClass.NONE
+        with pytest.raises(ValueError, match="^Visa allows one CE 3.0 attempt"):
+            purchase_history(FERNHILL, case, result)
+    story = being_sent()
+    story.poll(MONDAY + 2 * MINUTE)  # nothing moved
+    assert as_case(story["headphones"]).prior_challenges == 0
+
+
+def test_round_ones_challenge_uses_the_attempt_once_taken_or_shown_behind_another_reply():
+    # Airwallex took it with a 2xx and it never showed, or it shows behind Priya's accept, which the round keeps as its
+    # reply: either way the bank has the attempt, and nothing is sent again.
+    story = being_sent()
+    story.sandbox.reply("dst_headphones", Action.ACCEPT, SOMEONE, "OTHERS")
+    story.sandbox.reply("dst_headphones", Action.CHALLENGE, ACTOR, "PURCHASE_HISTORY")
+    story.sandbox.change("dst_headphones", status="CHALLENGED")
+    story.poll(MONDAY + 2 * MINUTE)
+    behind = story["headphones"]
+    assert behind.rounds[-1].reply.by == SOMEONE and any(reply.by == ACTOR for reply in behind.last.replies)
+    story = being_sent()
+    record = story["headphones"]
+    story.records["dst_headphones"] = taken(record, record.rounds[-1].plan.request_id, MONDAY + MINUTE)
+    story.poll(MONDAY + timedelta(days=7))
+    took = story["headphones"]
+    assert took.rounds[-1].plan.taken_at and not took.last.replies
+    for each in (behind, took):
+        case = as_case(each)
+        assert len(each.rounds) == 1 and case.prior_challenges == 1
+        result = ce3.check(FERNHILL, case)
+        assert "it can't be sent: Visa allows one CE 3.0 attempt" in result.reasons[0]
+        with pytest.raises(ValueError, match="^Visa allows one CE 3.0 attempt"):
+            purchase_history(FERNHILL, case, result)
 
 
 def test_rejected_sets_add_up_over_rounds():
