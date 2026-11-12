@@ -1,0 +1,7 @@
+{# A refusal or an error: fixed sentences, the module's own sentence as written, and the way back. #}
+{% extends "base.html" %}
+{% import "_voice.html" as v %}
+{% block main %}
+{% for x in view.lines %}{{ v.item(x, 3) }}{% endfor %}
+<p class="links">{% for link in view.links %}<a href="{{ link.href }}">{{ link.text }}</a>{% endfor %}</p>
+{% endblock %}

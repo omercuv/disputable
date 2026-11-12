@@ -1,0 +1,158 @@
+/* Disputable: one local stylesheet, system fonts, one column. Each voice has its own look, so a reader always knows
+   whose words a line is: code's plain, a record's and the bank's quoted, Claude's tinted, an evidence file's typed. */
+
+:root {
+  --ink: #1d232a;
+  --muted: #5b6672;
+  --line: #d6dbe1;
+  --paper: #ffffff;
+  --page: #f4f6f8;
+  --record: #f7f3e8;
+  --record-edge: #b8a46a;
+  --bank: #eef3fb;
+  --bank-edge: #5b7fb6;
+  --claude: #f3eefb;
+  --claude-edge: #8a6cc2;
+  --file: #fbfbfb;
+  --passed: #a4231c;
+  --today: #b8321f;
+  --soon: #9a6400;
+  --warn: #8a3b12;
+  --note: #49586a;
+  --demo: #fff8e1;
+  --demo-edge: #d9a400;
+  --live: #e8f5ec;
+  --live-edge: #3f8f5b;
+  --link: #1f5fa8;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--page);
+  color: var(--ink);
+  font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+a { color: var(--link); }
+a:focus, button:focus, summary:focus { outline: 3px solid #8fb6e8; outline-offset: 2px; }
+
+header.top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px 24px;
+  padding: 12px 24px;
+  background: var(--ink);
+}
+header.top p.app { margin: 0; font-weight: 700; font-size: 20px; }
+header.top a { color: #ffffff; text-decoration: none; }
+header.top nav a { margin-left: 16px; }
+header.top nav a:hover, header.top p.app a:hover { text-decoration: underline; }
+
+main, section.banner, p.done {
+  max-width: 980px;
+  margin: 16px auto;
+  padding: 0 24px;
+}
+
+main h1 { font-size: 24px; margin: 16px 0 8px; }
+h2 { font-size: 20px; margin: 20px 0 8px; }
+h3 { font-size: 17px; margin: 14px 0 6px; }
+h4, h5, h6 { font-size: 15px; margin: 10px 0 4px; }
+p { margin: 4px 0; }
+
+/* the banner and the demo bar */
+section.banner { padding: 12px 24px; border-left: 6px solid var(--live-edge); background: var(--live); }
+section.banner.demo { border-left-color: var(--demo-edge); background: var(--demo); }
+section.banner h2 { margin: 0 0 4px; font-size: 16px; text-transform: uppercase; letter-spacing: 0.06em; }
+div.bar { margin-top: 10px; padding-top: 8px; border-top: 1px solid var(--demo-edge); }
+div.bar h3 { margin: 0 0 4px; }
+p.pending a { margin-right: 16px; font-weight: 600; }
+div.buttons { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+div.buttons form { margin: 0; }
+p.done { padding: 8px 24px; background: #e7f0fb; border-left: 6px solid var(--link); }
+
+/* code's lines and their marks */
+p.code { white-space: pre-wrap; }
+p.passed, p.today { color: var(--passed); font-weight: 600; }
+p.soon { color: var(--soon); font-weight: 600; }
+p.warn { color: var(--warn); }
+p.note { color: var(--note); font-style: italic; }
+
+/* the voices of everyone but code */
+blockquote.record, blockquote.claude, div.file {
+  margin: 6px 0;
+  padding: 6px 10px;
+  border-left: 4px solid var(--record-edge);
+  background: var(--record);
+}
+blockquote.bank { border-left-color: var(--bank-edge); background: var(--bank); }
+blockquote.claude { border-left-color: var(--claude-edge); background: var(--claude); }
+p.source { margin: 0; color: var(--muted); font-size: 13px; }
+p.said { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+div.file {
+  margin: 0;
+  padding: 1px 10px;
+  border-left: 4px solid var(--line);
+  background: var(--file);
+  font-family: ui-monospace, "Cascadia Mono", Consolas, Menlo, monospace;
+  font-size: 14px;
+}
+div.file p.said { min-height: 1em; }
+
+/* the queue */
+section.group > h2 { border-bottom: 2px solid var(--line); padding-bottom: 4px; }
+article.card {
+  margin: 10px 0;
+  padding: 10px 14px;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+}
+article.card h3 { margin-top: 0; }
+p.links a { margin-right: 16px; font-weight: 600; }
+
+/* blocks */
+section.block, details.block { margin: 8px 0; }
+main > section.block, main > details.block {
+  padding: 8px 14px;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+}
+details.block > summary { cursor: pointer; font-weight: 600; margin: 4px 0; }
+details.block[open] > summary { margin-bottom: 6px; }
+
+/* the money table */
+table { width: 100%; border-collapse: collapse; background: var(--paper); margin: 8px 0; }
+th, td { text-align: left; vertical-align: top; padding: 6px 8px; border-bottom: 1px solid var(--line); }
+th { font-size: 14px; color: var(--muted); }
+td p { margin: 0; }
+
+/* forms */
+form { margin: 10px 0; }
+button {
+  font: inherit;
+  padding: 8px 14px;
+  border: 1px solid #174a85;
+  border-radius: 5px;
+  background: var(--link);
+  color: #ffffff;
+  cursor: pointer;
+}
+button:hover { background: #174a85; }
+section.decide {
+  margin: 16px 0;
+  padding: 12px 14px;
+  background: var(--paper);
+  border: 2px solid var(--link);
+  border-radius: 6px;
+}
+
+@media (max-width: 640px) {
+  header.top, main, section.banner, p.done { padding-left: 12px; padding-right: 12px; }
+  th, td { padding: 4px; font-size: 14px; }
+}

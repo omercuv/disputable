@@ -33,7 +33,8 @@ HEADPHONES_DUE = MONDAY + timedelta(days=6)  # Nov 8 at 17:00 UTC
 SOMEONE = "priya@fernhill.example"  # a person answering in Airwallex's web app
 # What the round orchestrator merges when Claude couldn't read the records: E1 sends every read case to a person.
 NO_READ = Evidence(EvidenceClass.NONE, conflicts=(
-    "Claude couldn't read this case's records (no Claude API key is set), so a person reads them before anything is sent.",))
+    "Claude couldn't read this case's records (this run doesn't use Claude), so a person reads them before anything "
+    "is sent.",))
 
 
 # ----------------------------------------------------------------------------- real records, step by step
@@ -342,7 +343,7 @@ def test_verify_passes_only_the_approved_plan():
     assert void_reason(record, again) is None  # and the screen agrees: it isn't void
     _, sam = approve(unsaved, shown(unsaved), "Sam", MONDAY + MINUTE)  # the same plan, but someone else's yes
     assert verify(record, sam) == "The approval on file isn't the one on this plan."
-    assert void_reason(record, sam) == "Your approval is void: the case has no record of it."
+    assert void_reason(record, sam) == "This approval is void: the case has no record of it."
     new_reasons = with_plan(record, reasons=("A reason nobody saw.",))
     assert verify(new_reasons, approval) == "The plan changed after it was approved."
     other_file = with_plan(record, terms=replace(terms, file_hashes=frozenset({"another-file"})))  # the same request id
@@ -382,7 +383,7 @@ def test_round_ones_approval_fails_verify_in_round_two():
     assert (second.round_number, second.stage, second.tier) == (2, Stage.CHARGEBACK, Tier.ONE_APPROVAL)
     assert verify(record, second) is None
     assert verify(record, first) == "The approval on file is for another dispute or round."
-    assert void_reason(record, first) == "Your approval is void: the bank moved the case to a new round."
+    assert void_reason(record, first) == "This approval is void: the bank moved the case to a new round."
 
 
 def test_the_story_sends_only_what_verify_passes():
@@ -472,7 +473,7 @@ def for_a_later_round():
         "another round"])
 def test_void_reason_names_what_changed(build, why):
     record, approval = build()
-    assert void_reason(record, approval) == f"Your approval is void: {why}."
+    assert void_reason(record, approval) == f"This approval is void: {why}."
     assert verify(record, approval) is not None
 
 
@@ -645,7 +646,7 @@ def test_a_passed_deadline_alerts():
     (alert,) = alerts([record], HEADPHONES_DUE)
     assert (alert.urgency, alert.message) == (
         Urgency.PASSED, "Order #1109 passed its deadline under an hour ago. Code hasn't made a plan yet.")
-    assert void_reason(record, approval) == "Your approval is void: the plan was dropped."
+    assert void_reason(record, approval) == "This approval is void: the plan was dropped."
 
 
 def test_alerts_come_soonest_first():

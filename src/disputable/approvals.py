@@ -181,24 +181,24 @@ def void_reason(record: CaseRecord, approval: ApprovalRecord) -> str | None:
     """Why an approval no longer stands, for the screen, or None while the round's plan still carries it. approval comes
     from approve() or from_json()."""
     if approval.dispute_id != record.dispute_id:
-        return "Your approval is void: it was for another dispute."
+        return "This approval is void: it was for another dispute."
     if approval.round_number < len(record.rounds):
-        return "Your approval is void: the bank moved the case to a new round."
+        return "This approval is void: the bank moved the case to a new round."
     if approval.round_number > len(record.rounds):
-        return "Your approval is void: it was for another round."
+        return "This approval is void: it was for another round."
     plan = record.rounds[-1].plan
     if plan is None:
-        return "Your approval is void: the plan was dropped."
+        return "This approval is void: the plan was dropped."
     old = load(Plan, json.loads(approval.plan), "the approved plan")
     changed = lifecycle.differences(old.terms, plan.terms)
     if changed:
-        return f"Your approval is void: {_listed(changed)} changed."
+        return f"This approval is void: {_listed(changed)} changed."
     if old.reasons != plan.reasons:
-        return "Your approval is void: the plan's reasons changed."
+        return "This approval is void: the plan's reasons changed."
     if plan_sha256(plan) != approval.plan_sha256:
-        return "Your approval is void: code made the plan again."
+        return "This approval is void: code made the plan again."
     if plan.approved_by != approval.by:  # not the time: a second click on the same plan is the same approval, as verify()
-        return "Your approval is void: the case has no record of it."
+        return "This approval is void: the case has no record of it."
     return None
 
 
@@ -326,3 +326,6 @@ def _broken(approval: ApprovalRecord, plan: Plan) -> str | None:
                                                                       approval.request_id):
         return "The approval's plan is for another dispute, stage or request."
     return None
+
+
+summary = _summary  # a public name for the screens: what a plan sends, from its terms alone

@@ -1,0 +1,11 @@
+{# The approval screen: exactly what one approval sends, why, the files, and the form that posts the plan it showed. #}
+{% extends "base.html" %}
+{% import "_voice.html" as v %}
+{% block main %}
+{% for x in view.lead %}{{ v.item(x, 3) }}{% endfor %}
+{% for block in view.blocks %}{{ v.item(block, 2) }}{% endfor %}
+<section class="decide">
+{% for x in view.closing %}{{ v.item(x, 3) }}{% endfor %}
+{% if view.form %}{{ v.form(view.form) }}{% endif %}
+</section>
+{% endblock %}

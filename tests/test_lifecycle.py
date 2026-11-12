@@ -877,7 +877,8 @@ def test_evidence_read_for_another_round_is_refused():
 def test_nothing_is_sent_without_a_reading_after_the_approval():
     story = waiting_for_priya()
     story.approve(MONDAY + MINUTE)
-    assert blocker(story["headphones"], MONDAY + MINUTE).startswith("Read the dispute again first.")
+    assert blocker(story["headphones"], MONDAY + MINUTE).startswith("The next pass reads the dispute again before it "
+                                                                    "sends: ")
     story.poll(MONDAY + 2 * MINUTE)
     assert blocker(story["headphones"], MONDAY + 2 * MINUTE) is None
 
@@ -885,15 +886,16 @@ def test_nothing_is_sent_without_a_reading_after_the_approval():
 def test_nothing_is_sent_on_an_old_reading():
     record = keep(one_case("ear_tips")["ear_tips"], None, MONDAY, round_number=1)
     assert blocker(record, MONDAY) is None
-    assert blocker(record, MONDAY + FRESH + MINUTE).startswith("Read the dispute again first.")
+    assert blocker(record, MONDAY + FRESH + MINUTE).startswith("The next pass reads the dispute again before it sends: ")
 
 
 def test_a_reading_is_fresh_for_ten_minutes():
     assert FRESH == timedelta(minutes=10)
     record = keep(one_case("ear_tips")["ear_tips"], None, MONDAY, round_number=1)
     assert blocker(record, MONDAY + timedelta(minutes=10)) is None
-    assert blocker(record, MONDAY + timedelta(minutes=10, seconds=1)) == ("Read the dispute again first. The last reading "
-                                                                          "is more than 10 minutes old.")
+    assert blocker(record, MONDAY + timedelta(minutes=10, seconds=1)) == ("The next pass reads the dispute again before "
+                                                                          "it sends: the last reading is more than 10 "
+                                                                          "minutes old.")
 
 
 def test_nothing_is_approved_or_sent_after_the_deadline():
@@ -917,7 +919,8 @@ def test_a_retry_after_a_restart_reuses_the_request_id():
     first = story["ear_tips"].rounds[0].plan
     story.records["dst_ear_tips"] = from_json(to_json(story["ear_tips"]))  # the app restarts: no answer was saved
     assert phase(story["ear_tips"]) is Phase.SENT
-    assert blocker(story["ear_tips"], MONDAY + MINUTE) == "Read the dispute again first. It may already show this response."
+    assert blocker(story["ear_tips"], MONDAY + MINUTE) == ("The next pass reads the dispute again before it sends: it may "
+                                                           "already show this response.")
     story.poll(MONDAY + 2 * MINUTE)  # still asking, so the POST didn't land
     retried = sending(story["ear_tips"], MONDAY + 2 * MINUTE).rounds[0].plan
     assert retried.request_id == first.request_id and retried.sending_at == MONDAY + 2 * MINUTE
@@ -2116,7 +2119,8 @@ def test_a_clock_that_goes_back_goes_to_a_person():
     assert story["headphones"].blocked == ("This app's clock went back, but Airwallex's dates say this reading is newer. "
                                            "A person checks it.")
     record = keep(one_case("ear_tips")["ear_tips"], None, MONDAY, round_number=1)
-    assert blocker(record, MONDAY - MINUTE) == "Read the dispute again first. This app's clock is behind the last reading."
+    assert blocker(record, MONDAY - MINUTE) == ("The next pass reads the dispute again before it sends: this app's clock "
+                                                "is behind the last reading.")
 
 
 @pytest.mark.parametrize("closed", [False, True], ids=["open case", "closed case"])

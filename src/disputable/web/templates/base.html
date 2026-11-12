@@ -1,0 +1,41 @@
+{# The frame of every page: the app's name, the links, the banner, the demo bar and the result of the last form. #}
+{% import "_voice.html" as v %}
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="referrer" content="same-origin">
+<title>{{ page.title }}</title>
+<link rel="stylesheet" href="/app.css">
+</head>
+<body class="{{ page.mode }}">
+<header class="top">
+<p class="app"><a href="/">{{ page.app }}</a></p>
+<nav>{% for link in page.nav %}<a href="{{ link.href }}">{{ link.text }}</a>{% endfor %}</nav>
+</header>
+{% if page.banner %}
+<section class="banner {{ page.banner.mode }}">
+<h2>{{ page.banner.title }}</h2>
+{% for line in page.banner.lines %}{{ v.say(line) }}{% endfor %}
+{% if page.bar %}
+<div class="bar">
+<h3>{{ page.bar.title }}</h3>
+{% for line in page.bar.lines %}{{ v.say(line) }}{% endfor %}
+{% if page.bar.links %}
+<p class="pending">{% for link in page.bar.links %}<a href="{{ link.href }}">{{ link.text }}</a>{% endfor %}</p>
+{% endif %}
+<div class="buttons">{% for button in page.bar.buttons %}{{ v.form(button) }}{% endfor %}</div>
+</div>
+{% endif %}
+</section>
+{% endif %}
+{% if page.done %}
+<p class="done">{{ page.done }}</p>
+{% endif %}
+<main>
+<h1>{{ page.title }}</h1>
+{% block main %}{% endblock %}
+</main>
+</body>
+</html>

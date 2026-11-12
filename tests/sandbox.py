@@ -5,8 +5,9 @@ from __future__ import annotations
 import copy
 from datetime import datetime, timedelta, timezone
 
+from disputable.airwallex import json_number
 from disputable.engine import Action, Evidence, decide
-from disputable.fees import EvidenceClass
+from disputable.fees import EvidenceClass, money
 from disputable.lifecycle import (ACTOR, Phase, approve, as_dispute, blocker, from_json, keep, phase, poll, sending, taken,
                                   to_json)
 from disputable.seed.fernhill import ANSWERS, ENDING_2_ANSWER, FERNHILL, MONDAY, THREE_WEEKS_LATER
@@ -22,14 +23,17 @@ class Sandbox:
         self.store, self.disputes, self.payments, self.opened, self.ticks = store, {}, {}, {}, 0
 
     def open(self, case_id, now=MONDAY, dispute_id=None, payment_id=None):
+        """The case's dispute on its order's payment, with exact amounts as JSON numbers: the case's amount, else the
+        order's total, so $15.71 stays 15.71 and a $100 part of a $600 order stays $100."""
         case = self.store.case(case_id)
         order = self.store.order(case.order_number)
         dispute_id, payment_id = dispute_id or f"dst_{case_id}", payment_id or f"int_{case_id}"
-        amount = int(order.amount)
+        total = json_number(order.amount)
+        amount = json_number(order.amount if case.amount is None else case.amount)
         self.payments.setdefault(payment_id, {
-            "id": payment_id, "amount": amount, "currency": "USD", "status": "SUCCEEDED", "captured_amount": amount,
+            "id": payment_id, "amount": total, "currency": "USD", "status": "SUCCEEDED", "captured_amount": total,
             "created_at": RUN_DATE.isoformat(), "metadata": {"order_no": order.number},
-            "latest_payment_attempt": {"captured_amount": amount, "refunded_amount": 0}})
+            "latest_payment_attempt": {"captured_amount": total, "refunded_amount": 0}})
         self.disputes[dispute_id] = {
             "id": dispute_id, "stage": case.stage.value, "status": "REQUIRES_RESPONSE", "amount": amount, "currency": "USD",
             "payment_intent_id": payment_id, "reason": {"original_code": case.reason_code}, "accept_details": [],
@@ -67,8 +71,8 @@ class Sandbox:
         assert (d["stage"], d["status"]) == (plan.terms.stage.value, "REQUIRES_RESPONSE")
         if plan.terms.action is Action.ACCEPT:
             if plan.terms.refund_amount:
-                self.payments[d["payment_intent_id"]]["latest_payment_attempt"]["refunded_amount"] += int(
-                    plan.terms.refund_amount)
+                attempt = self.payments[d["payment_intent_id"]]["latest_payment_attempt"]
+                attempt["refunded_amount"] = json_number(money(attempt["refunded_amount"]) + plan.terms.refund_amount)
                 d["refunds"] = [{"id": f"rfd_{record.dispute_id}"}]
             if show:
                 self.reply(record.dispute_id, Action.ACCEPT, ACTOR, plan.terms.reason)

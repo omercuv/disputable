@@ -1,3 +1,5 @@
+# Text files keep LF endings everywhere, in a checkout and in git archive, whatever core.autocrlf says.
+* text=auto eol=lf
 # Bytes, not text. A PDF's cross-reference table holds byte offsets, so a line-ending change breaks the file. With
 # core.autocrlf, git would make one on checkout and in git archive: a PDF has no NUL byte, so git takes it for text.
 *.pdf binary

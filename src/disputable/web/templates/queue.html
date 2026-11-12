@@ -1,0 +1,22 @@
+{# The queue: built from the board's records only, never from the store's cases. #}
+{% extends "base.html" %}
+{% import "_voice.html" as v %}
+{% block main %}
+{{ v.say(view.summary) }}
+{% for line in view.notes %}{{ v.say(line) }}{% endfor %}
+{% if view.alerts %}{{ v.item(view.alerts, 2) }}{% endif %}
+{% if view.problems %}{{ v.item(view.problems, 2) }}{% endif %}
+{% for group in view.groups %}
+<section class="group">
+<h2>{{ group.title }}</h2>
+{% for card in group.cards %}
+<article class="card">
+<h3>{{ card.title }}</h3>
+{% for x in card.lines %}{{ v.item(x, 4) }}{% endfor %}
+<p class="links">{% for link in card.links %}<a href="{{ link.href }}">{{ link.text }}</a>{% endfor %}</p>
+</article>
+{% endfor %}
+</section>
+{% endfor %}
+{% for line in view.footer %}{{ v.say(line) }}{% endfor %}
+{% endblock %}

@@ -4,6 +4,7 @@ builds the body and headers, parses each reply and maps each error status to its
 from __future__ import annotations
 
 import json
+import os
 
 import anthropic
 import httpx2
@@ -12,8 +13,8 @@ import pytest
 from disputable import prompts
 from disputable.engine import Stage
 from disputable.prompts import MODEL, case_prompt, system_prompt, tools_for
-from disputable.reader import READS, ClaudeReader, Failure, ReadRequest, ReaderBusy, from_json, live_reader, reading_key, \
-    to_json
+from disputable.reader import (READS, ClaudeReader, Failure, ReadRequest, ReaderBusy, claude_client, from_json,
+                               live_reader, reading_key, to_json)
 from disputable.seed.fernhill import FERNHILL as STORY, MONDAY
 from disputable.seed.scripted import error_body, fallback, proposal, text, thinking, tool_use
 
@@ -142,6 +143,18 @@ def test_errors_map_from_real_status_codes_and_bodies(status, code, outcome):
     assert [call.name for call in reading.tool_log] == list(READS) and from_json(to_json(reading)) == reading
 
 
+def test_a_400_for_an_account_with_no_credit_is_the_accounts_failure():
+    """The API answers an account with no credit with a 400, not a 402 (seen live on Nov 11, 2026). The read is then an
+    account failure, so an eval run stops at once on it, never with "a bug in this app"."""
+    message = ("Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or "
+               "purchase credits.")
+    reading, server = read((400, error_body(400, message=message, error_type="invalid_request_error")))
+    assert reading.failure is Failure.ACCOUNT and len(server.requests) == 1 and reading.tool_log == ()
+    assert from_json(to_json(reading)) == reading
+    other, _ = read((400, error_body(400, message="max_tokens: must be a positive number")))
+    assert other.failure is Failure.BAD_REQUEST  # any other 400 is still this app's own request
+
+
 @pytest.mark.parametrize("error", [httpx2.ConnectError("refused"), httpx2.ReadTimeout("slow")],
                          ids=["connection", "timeout"])
 def test_a_connection_that_fails_is_busy(error):
@@ -170,3 +183,32 @@ def test_live_reader_names_the_anthropic_api_whatever_the_shell_says(monkeypatch
     reader = live_reader("sk-ant-test")
     assert str(reader.client.base_url).rstrip("/") == "https://api.anthropic.com"
     assert reader.client.api_key == "sk-ant-test" and reader.client.max_retries == 2
+
+
+def test_the_claude_client_takes_nothing_from_the_shell(monkeypatch, tmp_path):
+    """The address, the headers, the proxy and the certificates are this app's own, whatever the shell sets (cli-1,
+    cli-5). A certificate file that holds no certificate would make a client that trusts the shell fail to build."""
+    no_certificate = tmp_path / "none.pem"
+    no_certificate.write_text("not a certificate\n", encoding="utf-8")
+    monkeypatch.setenv("SSL_CERT_FILE", str(no_certificate))
+    monkeypatch.setenv("SSL_CERT_DIR", str(tmp_path))
+    monkeypatch.setenv("ANTHROPIC_BASE_URL", "https://claude.example.com")
+    monkeypatch.setenv("ANTHROPIC_CUSTOM_HEADERS", "Authorization: Bearer from-the-shell\nX-From-The-Shell: yes")
+    monkeypatch.setenv("HTTPS_PROXY", "http://proxy.example.com:9")
+    client = claude_client(" sk-ant-test ")
+    try:
+        assert str(client.base_url).rstrip("/") == "https://api.anthropic.com"
+        assert client.api_key == "sk-ant-test" and client.max_retries == 2
+        headers = {name.lower(): value for name, value in client.default_headers.items()}
+        assert "x-from-the-shell" not in headers and "from-the-shell" not in str(headers)
+        assert client._client.trust_env is False  # no certificate or .netrc setting from the shell
+        assert not client._client._mounts  # and no proxy: the SDK mounts the shell's only when it has no transport
+        assert type(client._client._transport._pool).__name__ == "ConnectionPool"  # not an HTTPProxy pool
+        assert client._client._transport._pool._socket_options  # the SDK's TCP keepalive, kept for long reads
+        assert os.environ["ANTHROPIC_CUSTOM_HEADERS"].startswith("Authorization: Bearer from-the-shell")  # put back
+    finally:
+        client.close()
+    reader = live_reader("sk-ant-test")
+    assert str(reader.client.base_url).rstrip("/") == "https://api.anthropic.com"
+    assert "x-from-the-shell" not in {name.lower() for name in reader.client.default_headers}
+    reader.client.close()

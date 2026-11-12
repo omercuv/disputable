@@ -1,0 +1,47 @@
+{# Every line a page shows goes through say(): code's in a plain paragraph, anyone else's words in a labelled container. #}
+{# The label (source) is code's. The words (said) are the record's, the bank's, Claude's or the file's, verbatim. #}
+{% macro say(line) -%}
+{%- if line.voice.value == 'code' -%}
+<p class="{{ line.css }}">{{ line.text }}</p>
+{%- elif line.voice.value == 'file' -%}
+<div class="{{ line.css }}"><p class="said">{{ line.text }}</p></div>
+{%- else -%}
+<blockquote class="{{ line.css }}"><p class="source">{{ line.source }}</p><p class="said">{{ line.text }}</p></blockquote>
+{%- endif -%}
+{%- endmacro %}
+
+{% macro form(x) -%}
+<form method="post" action="{{ x.action }}">
+{%- for name, value in x.fields -%}
+<input type="hidden" name="{{ name }}" value="{{ value }}">
+{%- endfor -%}
+{%- if x.note -%}{{ say(x.note) }}{%- endif -%}
+<button type="submit">{{ x.button }}</button></form>
+{%- endmacro %}
+
+{% macro item(x, level) -%}
+{%- if x.kind == 'line' -%}
+{{ say(x) }}
+{%- elif x.kind == 'link' -%}
+<p class="link"><a href="{{ x.href }}">{{ x.text }}</a></p>
+{%- elif x.kind == 'form' -%}
+{{ form(x) }}
+{%- elif x.kind == 'table' -%}
+<table>
+<thead><tr>{% for column in x.columns %}<th>{{ column }}</th>{% endfor %}</tr></thead>
+<tbody>
+{% for row in x.rows %}
+<tr>{% for cell in row %}<td>{% for line in cell %}{{ say(line) }}{% endfor %}</td>{% endfor %}</tr>
+{% endfor %}
+</tbody>
+</table>
+{%- elif x.open -%}
+<section class="block level-{{ level }}"><h{{ [level, 6] | min }}>{{ x.title }}</h{{ [level, 6] | min }}>
+{% for y in x.items %}{{ item(y, level + 1) }}{% endfor %}
+</section>
+{%- else -%}
+<details class="block level-{{ level }}"><summary>{{ x.title }}</summary>
+{% for y in x.items %}{{ item(y, level + 1) }}{% endfor %}
+</details>
+{%- endif -%}
+{%- endmacro %}

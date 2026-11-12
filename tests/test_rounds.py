@@ -211,8 +211,8 @@ def test_every_line_has_the_designs_words():
     assert all(line.startswith(rules.LABEL) for line in (K1, K2, K5))
     key, = SUITE_ANSWERS["ce3_customer_claims_a_fraud_report"].conflicts  # #36's line, inside Claude's label
     assert K1 == rules.LABEL + key[0].lower() + key[1:]
-    assert NO_KEY == ("Claude couldn't read this case's records (no Claude API key is set), so a person reads them before "
-                      "anything is sent.")
+    assert NO_KEY == ("Claude couldn't read this case's records (this run doesn't use Claude), so a person reads them "
+                      "before anything is sent.")
     assert (HELD_FOR_ERROR, BUSY_NOTE, MAX_BUSY) == (
         "Code hit an error on this case's records. A person handles this round.",
         "Claude is busy. Code reads this case again on the next pass.", 3)

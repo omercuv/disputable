@@ -60,6 +60,7 @@ REFUND_FELL = ("The payment shows less refunded than an earlier reading did, so 
                "checks it.")
 UNSURE_FIGHT = ("This app's challenge never showed on the dispute, and Airwallex never answered it. The later-stage fees "
                 "are booked as if it reached the bank. A person checks it.")
+REREAD = "The next pass reads the dispute again before it sends: {why}"  # blocker(): the plan waits for a fresh reading
 HALF_EMOJI = re.compile("[\ud800-\udfff]")  # a lone surrogate: what's left of an emoji cut in half
 
 
@@ -487,13 +488,13 @@ def blocker(record: CaseRecord, now: datetime) -> str | None:
     if _needs_approval(plan) and not plan.approved_by:
         return "It waits for a person's approval."
     if last.at < plan.read_at or (plan.approved_at and last.at <= plan.approved_at):
-        return "Read the dispute again first. The last reading is older than the approval."
+        return REREAD.format(why="the last reading is older than the approval.")
     if plan.sending_at and last.at <= plan.sending_at:
-        return "Read the dispute again first. It may already show this response."
+        return REREAD.format(why="it may already show this response.")
     if now < last.at:
-        return "Read the dispute again first. This app's clock is behind the last reading."
+        return REREAD.format(why="this app's clock is behind the last reading.")
     if now - last.at > FRESH:
-        return f"Read the dispute again first. The last reading is more than {FRESH.seconds // 60} minutes old."
+        return REREAD.format(why=f"the last reading is more than {FRESH.seconds // 60} minutes old.")
     if last.dispute.status is not Status.REQUIRES_RESPONSE or last.dispute.stage is not plan.terms.stage:
         return "Airwallex no longer waits for this response."
     if now >= min(plan.terms.due_at, last.dispute.due_at):

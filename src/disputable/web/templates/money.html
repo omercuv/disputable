@@ -1,0 +1,8 @@
+{# The money screen: what the queue cost, what is at risk, and accepting everything at once beside it. #}
+{% extends "base.html" %}
+{% import "_voice.html" as v %}
+{% block main %}
+{% for line in view.summary %}{{ v.say(line) }}{% endfor %}
+{% if view.table %}{{ v.item(view.table, 2) }}{% endif %}
+{{ v.item(view.notes, 2) }}
+{% endblock %}

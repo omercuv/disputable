@@ -11,7 +11,9 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 import re
+import socket
 import time
 import unicodedata
 from dataclasses import dataclass, replace
@@ -21,6 +23,7 @@ from types import MappingProxyType
 from typing import Any, Callable, Mapping, Protocol, Sequence
 
 import anthropic
+import httpx2  # the SDK's own HTTP library (anthropic depends on it), for claude_client's transport
 
 from disputable import ce3, documents, prompts, rules
 from disputable.engine import Dispute, Stage, refund_problem
@@ -45,6 +48,7 @@ MAX_GIVEN = 200  # characters of a tool call's input, as the log keeps it
 MAX_ECHO = 40  # characters of Claude's input that a refusal repeats
 PROPOSE = "propose_decision"
 READS = ("get_order_history", "get_carrier_scans", "search_inbox")
+NO_CREDIT = "credit balance is too low"  # in the API's 400 for an account with no credit
 _JSON = {"sort_keys": True, "separators": (",", ":"), "ensure_ascii": True}  # keys, digests and the proposal text
 
 
@@ -52,6 +56,7 @@ class Failure(Enum):
     NO_KEY = "NO_KEY"
     NOT_ALLOWED = "NOT_ALLOWED"
     ACCOUNT = "ACCOUNT"
+    CAPPED = "CAPPED"  # this run hit a spend cap (its --cap, or the cap for one read) or the number of reads it was given
     BAD_REQUEST = "BAD_REQUEST"
     REFUSED = "REFUSED"
     CUT_OFF = "CUT_OFF"
@@ -66,9 +71,10 @@ class Failure(Enum):
 
 # The "{why}" in rounds' line: "Claude couldn't read this case's records ({why}), so a person reads them before ..."
 WHY: Mapping[Failure, str] = MappingProxyType({
-    Failure.NO_KEY: "no Claude API key is set",
+    Failure.NO_KEY: "this run doesn't use Claude",  # no key is set, or the run was told not to (--no-claude)
     Failure.NOT_ALLOWED: "the Claude API refused the key",
-    Failure.ACCOUNT: "the Claude API account can't take more requests (a spend limit, billing or a hold)",
+    Failure.ACCOUNT: "the Claude API account can't take more requests: a spend limit, billing or a hold",
+    Failure.CAPPED: "this run hit a spend cap or the number of reads it was given",
     Failure.BAD_REQUEST: "the Claude API refused this app's request",
     Failure.REFUSED: "Claude declined to read it",
     Failure.CUT_OFF: "Claude's answer was cut off",
@@ -321,7 +327,8 @@ class ClaudeReader:
 
 
 class NoReader:
-    """No API key: no client is built and no call is made, so every case that reads records goes to a person."""
+    """A run that doesn't use Claude: no key is set, or the run was told not to (--no-claude). No client is built and no
+    call is made, so every case that reads records goes to a person."""
 
     def read(self, request: ReadRequest) -> Reading:
         return failed(request.key, Failure.NO_KEY)
@@ -338,12 +345,43 @@ class ReplayReader:
         return reading if reading is not None else failed(request.key, Failure.NOT_RECORDED)
 
 
+CLAUDE_API = "https://api.anthropic.com"
+CUSTOM_HEADERS = "ANTHROPIC_CUSTOM_HEADERS"  # the SDK adds these to every request when the shell sets them
+
+
+def claude_client(api_key: str) -> anthropic.Anthropic:
+    """The one Claude client this app builds, for a key the caller read. It takes nothing from the shell: it names the
+    address, so ANTHROPIC_BASE_URL can't send the records elsewhere; it builds the client while ANTHROPIC_CUSTOM_HEADERS
+    is out of the environment, so no header from the shell rides along (the SDK reads it only while it builds a client);
+    and its HTTP client has a transport of this app's own that doesn't trust the environment. The SDK's default client
+    mounts the shell's proxies whatever trust_env says, unless it is given a transport, so this one has no proxy and
+    takes no certificate or .netrc setting from the shell. Callers build it once, at the start of a command."""
+    saved = os.environ.pop(CUSTOM_HEADERS, None)
+    try:
+        return anthropic.Anthropic(api_key=api_key.strip(), base_url=CLAUDE_API, max_retries=2,
+                                   http_client=anthropic.DefaultHttpxClient(trust_env=False, transport=_transport()))
+    finally:
+        if saved is not None:
+            os.environ[CUSTOM_HEADERS] = saved
+
+
+def _transport() -> httpx2.HTTPTransport:
+    """The SDK's own default transport (its connection limits and TCP keepalive, so a read of several minutes keeps
+    its connection), with no proxy and nothing from the environment."""
+    options: list[tuple[int, int, int | bool]] = [(socket.SOL_SOCKET, socket.SO_KEEPALIVE, True)]
+    for name, value in (("TCP_KEEPINTVL", 60), ("TCP_KEEPCNT", 5), ("TCP_KEEPIDLE", 60)):
+        number = getattr(socket, name, None)
+        if number is not None:
+            options.append((socket.IPPROTO_TCP, number, value))
+    return httpx2.HTTPTransport(trust_env=False, limits=anthropic.DEFAULT_CONNECTION_LIMITS, socket_options=options)
+
+
 def live_reader(api_key: str | None) -> Reader:
-    """The reader for a key the caller read. This never reads .env or the environment, and it names the base URL, so a
-    shell's ANTHROPIC_BASE_URL can't send the records elsewhere."""
+    """The reader for a key the caller read. This never reads .env, and its client takes nothing from the shell
+    (claude_client)."""
     if api_key is None or not api_key.strip():
         return NoReader()
-    return ClaudeReader(anthropic.Anthropic(api_key=api_key.strip(), base_url="https://api.anthropic.com", max_retries=2))
+    return ClaudeReader(claude_client(api_key))
 
 
 def reading_key(store: Store, case: Case, *, profile: StoreProfile = FERNHILL, effort: str = EFFORT) -> str:
@@ -462,13 +500,13 @@ FIELD_NAMES: Mapping[str, str] = MappingProxyType({
     "source": "source", "status": "status", "subject": "subject", "thread_id": "thread", "three_ds": "3DS",
     "to_addr": "recipient", "tracking_number": "tracking number",
 })
-_RECORDS = {Order: "Order", Email: "Email", WarrantyRegistration: "Warranty sign-up"}
+_RECORDS = {Email: "Email", WarrantyRegistration: "Warranty sign-up"}
 _SCANS = {"carrier": "Carrier scan", "warehouse": "Warehouse scan"}
 
 
 def describe(row: Row, store: Store) -> str:
-    """Code's label for a row, from the record's type and the field: "Email email-1098-1, text". It holds a store id at
-    most, never what Claude wrote."""
+    """Code's label for a row, from the record and the field, as the case page heads the record: "Email email-1098-1,
+    text", "Order #1109, cardholder's name". It holds a store id or an order number at most, never what Claude wrote."""
     if row.part == "tag":
         return "A reported order"
     if row.record_id.strip() == BANK_COMMENT:
@@ -477,11 +515,13 @@ def describe(row: Row, store: Store) -> str:
         record = store.record(row.record_id.strip())
     except KeyError:
         return "A record the store doesn't have"
-    if isinstance(record, Scan):
-        kind = _SCANS.get(documents.key(record.source), "Scan")
+    if isinstance(record, Order):
+        name = f"Order #{record.number}"
+    elif isinstance(record, Scan):
+        name = f"{_SCANS.get(documents.key(record.source), 'Scan')} {record.id}"
     else:
-        kind = _RECORDS.get(type(record), "Record")
-    return f"{kind} {record.id}, {FIELD_NAMES.get(row.field.strip(), 'a field it does not have')}"
+        name = f"{_RECORDS.get(type(record), 'Record')} {record.id}"
+    return f"{name}, {FIELD_NAMES.get(row.field.strip(), 'a field it does not have')}"
 
 
 def to_json(reading: Reading) -> str:
@@ -670,9 +710,10 @@ def _check_stop(message: Any) -> None:
 
 
 def _status(error: anthropic.APIStatusError) -> Exception:
-    """An error status, most specific first: the account, the key, a busy API, then this app's own request."""
+    """An error status, most specific first: the account, the key, a busy API, then this app's own request. An account
+    with no credit gets a 400, not a 402 (seen live on Nov 11, 2026), so that 400 is the account's too."""
     account = (anthropic.EnforcedSpendLimitReachedError, anthropic.OrganizationOnHoldError)
-    if isinstance(error, account) or error.status_code == 402:
+    if isinstance(error, account) or error.status_code == 402 or _no_credit(error):
         return _Stop(Failure.ACCOUNT)
     if isinstance(error, (anthropic.AuthenticationError, anthropic.PermissionDeniedError)):
         return _Stop(Failure.NOT_ALLOWED)
@@ -680,6 +721,14 @@ def _status(error: anthropic.APIStatusError) -> Exception:
                           anthropic.ConflictError)):
         return _Busy(f"The Claude API answered {error.status_code}.")
     return _Stop(Failure.BAD_REQUEST)
+
+
+def _no_credit(error: anthropic.APIStatusError) -> bool:
+    """The API's 400 for an account with no credit: "Your credit balance is too low to access the Anthropic API. ..."."""
+    body = error.body if isinstance(error.body, dict) else {}
+    inner = body.get("error")
+    message = inner.get("message") if isinstance(inner, dict) else None
+    return error.status_code == 400 and isinstance(message, str) and NO_CREDIT in message.casefold()
 
 
 def _call(message: Any, max_tokens: int) -> Call:
@@ -961,3 +1010,6 @@ def _proposing(log: Sequence[ToolCall]) -> int:
     """The attempt that proposed: the last accepted propose_decision in the log, else the last attempt that called."""
     accepted = [call.attempt for call in log if call.name == PROPOSE and not call.refused]
     return accepted[-1] if accepted else max((call.attempt for call in log), default=1)
+
+
+proposing = _proposing

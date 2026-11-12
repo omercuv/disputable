@@ -26,6 +26,9 @@ import pytest
 from cases import READ, code_alone, read_with, request
 from disputable import approvals, ce3, documents, lifecycle, prompts, rounds, rules
 from disputable.engine import Action, Decision, Dispute, Evidence, Stage, Status, decide
+from disputable.evals import score as eval_score
+from disputable.evals.score import Walked
+from disputable.evals.sites import KINDS, cut
 from disputable.fees import FEES_V1, ZERO, ChallengeReason, EvidenceClass
 from disputable.lifecycle import CaseRecord, Phase, as_case, as_dispute, blocker, cost, phase, poll
 from disputable.reader import WHY, Failure, NoReader, Reading, ReadRequest, Toolbox, failed, reading_key
@@ -57,7 +60,6 @@ NO_KEY = E1.format(why=WHY[Failure.NO_KEY])
 READER_LINES = (G1, *(E1.format(why=why) for why in WHY.values()), IN, K1, K2, K5, U1, T1)  # in the merge's order
 DAY = timedelta(days=1)
 FIRST_ASK = "Cardholder does not recognise this card-absent transaction."  # round one's comment, before the rejection
-KINDS = ("customers", "orders", "scans", "emails", "warranty", "cases")
 
 
 # ----------------------------------------------------------------------------- pure work, done once
@@ -157,15 +159,6 @@ def at_decide(label: str) -> CaseRecord:
 
 # ----------------------------------------------------------------------------- the walks
 @dataclass(frozen=True)
-class Walked:
-    """One case read by one reader: what the reader sent, what evidence_for() merged, code's conclusion and decide()."""
-    reading: Reading
-    evidence: Evidence
-    conclusion: Conclusion
-    decision: Decision
-
-
-@dataclass(frozen=True)
 class Site:
     """A case to walk: a read case, or a $30 copy of one."""
     name: str
@@ -261,24 +254,8 @@ def draft_of(decision: Decision) -> Action | None:
 
 
 def broken(site: Site, walk: Walked) -> tuple[str, ...]:
-    """Which of I1, I2 and I3 the merged decision breaks against code alone on the same case."""
-    code, by_code = alone(site.name)
-    evidence, decision, broke = walk.evidence, walk.decision, []
-    if decision.action in (ACCEPT, CHALLENGE) and not decision.needs_approval:  # it goes out with no person
-        sent = (decision.action, False, decision.accept_reason, decision.challenge_reason, decision.refund_amount,
-                evidence.evidence_class, evidence.fact_ids, evidence.file_hashes)
-        if sent != (by_code.action, by_code.needs_approval, by_code.accept_reason, by_code.challenge_reason,
-                    by_code.refund_amount, code.evidence.evidence_class, code.evidence.fact_ids, code.evidence.file_hashes):
-            broke.append("I1")
-    if CHALLENGE in (decision.action, decision.recommended) and not (
-            CHALLENGE in (by_code.action, by_code.recommended) and evidence.fact_ids <= code.evidence.fact_ids
-            and evidence.file_hashes == {file.sha256 for file in walk.conclusion.files}):
-        broke.append("I2")
-    owed = {ZERO, site.dispute.amount} if site.dispute.stage is Stage.RFI else {ZERO}
-    both_accept = ACCEPT in (decision.action, decision.recommended) and ACCEPT in (by_code.action, by_code.recommended)
-    if decision.refund_amount not in owed or (both_accept and decision.refund_amount != by_code.refund_amount):
-        broke.append("I3")
-    return tuple(broke)
+    """Which of I1, I2 and I3 the merged decision breaks against code alone on the same case: the eval's own check."""
+    return eval_score.broken(site.dispute, walk, *alone(site.name))
 
 
 # ----------------------------------------------------------------------------- the records the walks start from
@@ -526,15 +503,6 @@ def test_a_tag_never_drafts_a_fight_whose_file_only_a_person_can_write():
 
 
 # ----------------------------------------------------------------------------- planted lines
-def cut(store: Store, line: str) -> Store:
-    """The store with a planted line cut from every field of every record that holds it, the bank's comment included."""
-    def without(record):
-        changes = {item.name: value.replace(line, "") for item in fields(record)
-                   if isinstance(value := getattr(record, item.name), str) and line in value}
-        return replace(record, **changes) if changes else record
-    return replace(store, **{name: tuple(map(without, getattr(store, name))) for name in KINDS})
-
-
 TEXTS: dict[int, tuple[Store, list[tuple[object, tuple[str, ...]]]]] = {}  # by store: each record's field text
 
 
