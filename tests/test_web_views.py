@@ -940,8 +940,8 @@ def test_a_challenges_screen_says_what_airwallex_adds_and_what_else_this_app_sen
     closing = texts(*views.approval(story("1")[step], "dst_headphones", csrf=CSRF).closing)
     assert closing[-2:] == [w.AIRWALLEX_ADDS, w.SENDS_ONLY]
     assert w.AIRWALLEX_ADDS == ("Airwallex adds a summary file of its own to every challenge. It may also fill in the "
-                                "store's profile from the store's Airwallex account, and the order's number, currency and "
-                                "date from the payment.")  # as fixtures/spike/066 and 073 show it
+                                "store's profile and the order's number, currency and date. At a chargeback it may add an "
+                                "IP address and a device id that this app never sends.")  # fixtures/spike/066, 073; Ending 1
 
 
 def test_the_fields_the_screen_names_are_the_ones_a_challenge_sends():

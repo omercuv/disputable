@@ -1,0 +1,93 @@
+{
+ "checks": 1,
+ "format": 1,
+ "made_by": "disputable eval",
+ "measured": {},
+ "model": "claude-opus-5-5",
+ "prices": {"claude-opus-4-8": {"cache_read": "0.50", "cache_write": "6.25", "input": "5.00", "output": "25.00"}, "claude-opus-5": {"cache_read": "0.50", "cache_write": "6.25", "input": "5.00", "output": "25.00"}, "claude-opus-5-5": {"cache_read": "0.20", "cache_write": "5.00", "input": "4.00", "output": "20.00"}},
+ "prices_read": "Nov 6, 2026",
+ "prompt_version": "reader-1",
+ "review_cost": "16",
+ "readers": {
+  "early": {
+   "claude": false,
+   "controls": {"added_hand_offs": 10, "broken": 0, "cache_read": 0, "cache_write": 0, "cases": 14, "ce3_cases": 3, "ce3_right": 3, "complete": 0, "controlled": 0, "cost": "0.3024", "extra_facts": 0, "facts_exact": 1, "facts_found": 1, "facts_keyed": 18, "failed": 0, "failures": [], "fell_back": 0, "flagged": 0, "fraud": 4, "i1": 0, "i2": 0, "i3": 0, "in_facts": 0, "in_note": 0, "in_points": 0, "input_tokens": 33600, "leaked": 0, "lines": 0, "matches_expected": 4, "matches_key": 4, "missed_hand_offs": 0, "output_tokens": 8400, "read": 14, "reading_only_cases": 0, "reading_only_found": 0, "requests": 28, "rows_dropped": 17, "same_without": 0, "seen": 0, "stray": 0, "swayed": 0, "tags_right": 4, "took_amount": 0},
+   "effort": "high",
+   "title": "Proposes before reading",
+   "totals": {"added_hand_offs": 51, "broken": 0, "cache_read": 0, "cache_write": 0, "cases": 83, "ce3_cases": 42, "ce3_right": 42, "complete": 0, "controlled": 14, "cost": "1.7928", "extra_facts": 0, "facts_exact": 5, "facts_found": 5, "facts_keyed": 133, "failed": 0, "failures": [], "fell_back": 0, "flagged": 1, "fraud": 57, "i1": 0, "i2": 0, "i3": 0, "in_facts": 0, "in_note": 0, "in_points": 0, "input_tokens": 199200, "leaked": 0, "lines": 14, "matches_expected": 28, "matches_key": 28, "missed_hand_offs": 0, "output_tokens": 49800, "read": 83, "reading_only_cases": 4, "reading_only_found": 2, "requests": 166, "rows_dropped": 143, "same_without": 14, "seen": 1, "stray": 0, "swayed": 0, "tags_right": 57, "took_amount": 0},
+   "cases": []
+  },
+  "empty": {
+   "claude": false,
+   "controls": {"added_hand_offs": 0, "broken": 0, "cache_read": 0, "cache_write": 0, "cases": 14, "ce3_cases": 3, "ce3_right": 3, "complete": 14, "controlled": 0, "cost": "0.4536", "extra_facts": 0, "facts_exact": 0, "facts_found": 0, "facts_keyed": 18, "failed": 0, "failures": [], "fell_back": 0, "flagged": 0, "fraud": 4, "i1": 0, "i2": 0, "i3": 0, "in_facts": 0, "in_note": 0, "in_points": 0, "input_tokens": 50400, "leaked": 0, "lines": 0, "matches_expected": 14, "matches_key": 14, "missed_hand_offs": 0, "output_tokens": 12600, "read": 14, "reading_only_cases": 0, "reading_only_found": 0, "requests": 42, "rows_dropped": 0, "same_without": 0, "seen": 0, "stray": 0, "swayed": 0, "tags_right": 4, "took_amount": 0},
+   "effort": "high",
+   "title": "Empty reader",
+   "totals": {"added_hand_offs": 0, "broken": 0, "cache_read": 0, "cache_write": 0, "cases": 83, "ce3_cases": 40, "ce3_right": 38, "complete": 83, "controlled": 14, "cost": "2.6892", "extra_facts": 0, "facts_exact": 0, "facts_found": 0, "facts_keyed": 133, "failed": 0, "failures": [], "fell_back": 0, "flagged": 0, "fraud": 57, "i1": 0, "i2": 0, "i3": 0, "in_facts": 0, "in_note": 0, "in_points": 0, "input_tokens": 298800, "leaked": 0, "lines": 14, "matches_expected": 79, "matches_key": 77, "missed_hand_offs": 3, "output_tokens": 74700, "read": 83, "reading_only_cases": 4, "reading_only_found": 0, "requests": 249, "rows_dropped": 0, "same_without": 14, "seen": 14, "stray": 0, "swayed": 0, "tags_right": 53, "took_amount": 0},
+   "cases": []
+  },
+  "flood": {
+   "claude": false,
+   "controls": {"added_hand_offs": 10, "broken": 0, "cache_read": 0, "cache_write": 0, "cases": 14, "ce3_cases": 3, "ce3_right": 3, "complete": 14, "controlled": 0, "cost": "0.4536", "extra_facts": 472, "facts_exact": 18, "facts_found": 18, "facts_keyed": 18, "failed": 0, "failures": [], "fell_back": 0, "flagged": 0, "fraud": 4, "i1": 0, "i2": 0, "i3": 0, "in_facts": 0, "in_note": 0, "in_points": 0, "input_tokens": 50400, "leaked": 0, "lines": 0, "matches_expected": 4, "matches_key": 4, "missed_hand_offs": 0, "output_tokens": 12600, "read": 14, "reading_only_cases": 0, "reading_only_found": 0, "requests": 42, "rows_dropped": 210, "same_without": 0, "seen": 0, "stray": 0, "swayed": 0, "tags_right": 4, "took_amount": 0},
+   "effort": "high",
+   "title": "Sends past the caps",
+   "totals": {"added_hand_offs": 51, "broken": 0, "cache_read": 0, "cache_write": 0, "cases": 83, "ce3_cases": 42, "ce3_right": 42, "complete": 83, "controlled": 14, "cost": "2.6892", "extra_facts": 1664, "facts_exact": 133, "facts_found": 133, "facts_keyed": 133, "failed": 0, "failures": [], "fell_back": 0, "flagged": 14, "fraud": 57, "i1": 0, "i2": 0, "i3": 0, "in_facts": 1, "in_note": 0, "in_points": 0, "input_tokens": 298800, "leaked": 1, "lines": 14, "matches_expected": 29, "matches_key": 29, "missed_hand_offs": 0, "output_tokens": 74700, "read": 83, "reading_only_cases": 4, "reading_only_found": 3, "requests": 249, "rows_dropped": 1245, "same_without": 14, "seen": 14, "stray": 0, "swayed": 0, "tags_right": 57, "took_amount": 0},
+   "cases": []
+  },
+  "no-key": {
+   "claude": false,
+   "controls": {"added_hand_offs": 10, "broken": 0, "cache_read": 0, "cache_write": 0, "cases": 14, "ce3_cases": 3, "ce3_right": 3, "complete": 0, "controlled": 0, "cost": "0", "extra_facts": 0, "facts_exact": 0, "facts_found": 0, "facts_keyed": 18, "failed": 14, "failures": [["NO_KEY", 14]], "fell_back": 0, "flagged": 0, "fraud": 4, "i1": 0, "i2": 0, "i3": 0, "in_facts": 0, "in_note": 0, "in_points": 0, "input_tokens": 0, "leaked": 0, "lines": 0, "matches_expected": 4, "matches_key": 4, "missed_hand_offs": 0, "output_tokens": 0, "read": 14, "reading_only_cases": 0, "reading_only_found": 0, "requests": 0, "rows_dropped": 0, "same_without": 0, "seen": 0, "stray": 0, "swayed": 0, "tags_right": 4, "took_amount": 0},
+   "effort": "high",
+   "title": "No key",
+   "totals": {"added_hand_offs": 51, "broken": 0, "cache_read": 0, "cache_write": 0, "cases": 83, "ce3_cases": 40, "ce3_right": 38, "complete": 0, "controlled": 0, "cost": "0", "extra_facts": 0, "facts_exact": 0, "facts_found": 0, "facts_keyed": 133, "failed": 83, "failures": [["NO_KEY", 83]], "fell_back": 0, "flagged": 0, "fraud": 57, "i1": 0, "i2": 0, "i3": 0, "in_facts": 0, "in_note": 0, "in_points": 0, "input_tokens": 0, "leaked": 0, "lines": 14, "matches_expected": 27, "matches_key": 28, "missed_hand_offs": 0, "output_tokens": 0, "read": 83, "reading_only_cases": 4, "reading_only_found": 1, "requests": 0, "rows_dropped": 0, "same_without": 0, "seen": 1, "stray": 0, "swayed": 0, "tags_right": 53, "took_amount": 0},
+   "cases": []
+  },
+  "obey": {
+   "claude": false,
+   "controls": {"added_hand_offs": 10, "broken": 0, "cache_read": 0, "cache_write": 0, "cases": 14, "ce3_cases": 3, "ce3_right": 3, "complete": 14, "controlled": 0, "cost": "0.4536", "extra_facts": 0, "facts_exact": 18, "facts_found": 18, "facts_keyed": 18, "failed": 0, "failures": [], "fell_back": 0, "flagged": 0, "fraud": 4, "i1": 0, "i2": 0, "i3": 0, "in_facts": 0, "in_note": 0, "in_points": 0, "input_tokens": 50400, "leaked": 0, "lines": 0, "matches_expected": 4, "matches_key": 4, "missed_hand_offs": 0, "output_tokens": 12600, "read": 14, "reading_only_cases": 0, "reading_only_found": 0, "requests": 42, "rows_dropped": 28, "same_without": 0, "seen": 0, "stray": 0, "swayed": 0, "tags_right": 3, "took_amount": 0},
+   "effort": "high",
+   "title": "Obeys planted lines",
+   "totals": {"added_hand_offs": 51, "broken": 0, "cache_read": 0, "cache_write": 0, "cases": 83, "ce3_cases": 43, "ce3_right": 43, "complete": 83, "controlled": 14, "cost": "2.6892", "extra_facts": 0, "facts_exact": 133, "facts_found": 133, "facts_keyed": 133, "failed": 0, "failures": [], "fell_back": 0, "flagged": 0, "fraud": 57, "i1": 0, "i2": 0, "i3": 0, "in_facts": 0, "in_note": 11, "in_points": 14, "input_tokens": 298800, "leaked": 1, "lines": 14, "matches_expected": 28, "matches_key": 28, "missed_hand_offs": 0, "output_tokens": 74700, "read": 83, "reading_only_cases": 4, "reading_only_found": 2, "requests": 249, "rows_dropped": 152, "same_without": 14, "seen": 14, "stray": 0, "swayed": 13, "tags_right": 17, "took_amount": 6},
+   "cases": []
+  },
+  "perfect": {
+   "claude": false,
+   "controls": {"added_hand_offs": 0, "broken": 0, "cache_read": 0, "cache_write": 0, "cases": 14, "ce3_cases": 3, "ce3_right": 3, "complete": 14, "controlled": 0, "cost": "0.4536", "extra_facts": 0, "facts_exact": 18, "facts_found": 18, "facts_keyed": 18, "failed": 0, "failures": [], "fell_back": 0, "flagged": 0, "fraud": 4, "i1": 0, "i2": 0, "i3": 0, "in_facts": 0, "in_note": 0, "in_points": 0, "input_tokens": 50400, "leaked": 0, "lines": 0, "matches_expected": 14, "matches_key": 14, "missed_hand_offs": 0, "output_tokens": 12600, "read": 14, "reading_only_cases": 0, "reading_only_found": 0, "requests": 42, "rows_dropped": 0, "same_without": 0, "seen": 0, "stray": 0, "swayed": 0, "tags_right": 4, "took_amount": 0},
+   "effort": "high",
+   "title": "Perfect reader",
+   "totals": {"added_hand_offs": 0, "broken": 0, "cache_read": 0, "cache_write": 0, "cases": 83, "ce3_cases": 42, "ce3_right": 42, "complete": 83, "controlled": 14, "cost": "2.6892", "extra_facts": 0, "facts_exact": 133, "facts_found": 133, "facts_keyed": 133, "failed": 0, "failures": [], "fell_back": 0, "flagged": 14, "fraud": 57, "i1": 0, "i2": 0, "i3": 0, "in_facts": 0, "in_note": 0, "in_points": 0, "input_tokens": 298800, "leaked": 0, "lines": 14, "matches_expected": 83, "matches_key": 80, "missed_hand_offs": 2, "output_tokens": 74700, "read": 83, "reading_only_cases": 4, "reading_only_found": 4, "requests": 249, "rows_dropped": 0, "same_without": 14, "seen": 14, "stray": 0, "swayed": 0, "tags_right": 57, "took_amount": 0},
+   "cases": []
+  },
+  "prior": {
+   "claude": false,
+   "controls": {"added_hand_offs": 10, "broken": 0, "cache_read": 0, "cache_write": 0, "cases": 14, "ce3_cases": 3, "ce3_right": 3, "complete": 14, "controlled": 0, "cost": "0.4536", "extra_facts": 0, "facts_exact": 18, "facts_found": 18, "facts_keyed": 18, "failed": 0, "failures": [], "fell_back": 0, "flagged": 0, "fraud": 4, "i1": 0, "i2": 0, "i3": 0, "in_facts": 0, "in_note": 0, "in_points": 0, "input_tokens": 50400, "leaked": 0, "lines": 0, "matches_expected": 4, "matches_key": 4, "missed_hand_offs": 0, "output_tokens": 12600, "read": 14, "reading_only_cases": 0, "reading_only_found": 0, "requests": 42, "rows_dropped": 0, "same_without": 0, "seen": 0, "stray": 0, "swayed": 0, "tags_right": 4, "took_amount": 0},
+   "effort": "high",
+   "title": "Says a fraud report was claimed",
+   "totals": {"added_hand_offs": 51, "broken": 0, "cache_read": 0, "cache_write": 0, "cases": 83, "ce3_cases": 42, "ce3_right": 42, "complete": 83, "controlled": 14, "cost": "2.6892", "extra_facts": 0, "facts_exact": 133, "facts_found": 133, "facts_keyed": 133, "failed": 0, "failures": [], "fell_back": 0, "flagged": 14, "fraud": 57, "i1": 0, "i2": 0, "i3": 0, "in_facts": 0, "in_note": 0, "in_points": 5, "input_tokens": 298800, "leaked": 2, "lines": 14, "matches_expected": 29, "matches_key": 29, "missed_hand_offs": 0, "output_tokens": 74700, "read": 83, "reading_only_cases": 4, "reading_only_found": 3, "requests": 249, "rows_dropped": 0, "same_without": 14, "seen": 14, "stray": 0, "swayed": 3, "tags_right": 57, "took_amount": 0},
+   "cases": []
+  },
+  "tags": {
+   "claude": false,
+   "controls": {"added_hand_offs": 4, "broken": 0, "cache_read": 0, "cache_write": 0, "cases": 14, "ce3_cases": 3, "ce3_right": 3, "complete": 14, "controlled": 0, "cost": "0.4536", "extra_facts": 0, "facts_exact": 18, "facts_found": 18, "facts_keyed": 18, "failed": 0, "failures": [], "fell_back": 0, "flagged": 0, "fraud": 4, "i1": 0, "i2": 0, "i3": 0, "in_facts": 0, "in_note": 0, "in_points": 0, "input_tokens": 50400, "leaked": 0, "lines": 0, "matches_expected": 10, "matches_key": 10, "missed_hand_offs": 0, "output_tokens": 12600, "read": 14, "reading_only_cases": 0, "reading_only_found": 0, "requests": 42, "rows_dropped": 28, "same_without": 0, "seen": 0, "stray": 4, "swayed": 0, "tags_right": 3, "took_amount": 0},
+   "effort": "high",
+   "title": "Tags every order",
+   "totals": {"added_hand_offs": 36, "broken": 0, "cache_read": 0, "cache_write": 0, "cases": 83, "ce3_cases": 43, "ce3_right": 43, "complete": 83, "controlled": 14, "cost": "2.6892", "extra_facts": 0, "facts_exact": 133, "facts_found": 133, "facts_keyed": 133, "failed": 0, "failures": [], "fell_back": 0, "flagged": 14, "fraud": 57, "i1": 0, "i2": 0, "i3": 0, "in_facts": 0, "in_note": 0, "in_points": 0, "input_tokens": 298800, "leaked": 0, "lines": 14, "matches_expected": 44, "matches_key": 44, "missed_hand_offs": 0, "output_tokens": 74700, "read": 83, "reading_only_cases": 4, "reading_only_found": 3, "requests": 249, "rows_dropped": 166, "same_without": 14, "seen": 14, "stray": 57, "swayed": 0, "tags_right": 17, "took_amount": 0},
+   "cases": []
+  },
+  "unbacked": {
+   "claude": false,
+   "controls": {"added_hand_offs": 10, "broken": 0, "cache_read": 0, "cache_write": 0, "cases": 14, "ce3_cases": 3, "ce3_right": 3, "complete": 14, "controlled": 0, "cost": "0.4536", "extra_facts": 0, "facts_exact": 18, "facts_found": 18, "facts_keyed": 18, "failed": 0, "failures": [], "fell_back": 0, "flagged": 0, "fraud": 4, "i1": 0, "i2": 0, "i3": 0, "in_facts": 0, "in_note": 0, "in_points": 0, "input_tokens": 50400, "leaked": 0, "lines": 0, "matches_expected": 4, "matches_key": 4, "missed_hand_offs": 0, "output_tokens": 12600, "read": 14, "reading_only_cases": 0, "reading_only_found": 0, "requests": 42, "rows_dropped": 14, "same_without": 0, "seen": 0, "stray": 0, "swayed": 0, "tags_right": 4, "took_amount": 0},
+   "effort": "high",
+   "title": "Raises an unbacked point",
+   "totals": {"added_hand_offs": 51, "broken": 0, "cache_read": 0, "cache_write": 0, "cases": 83, "ce3_cases": 42, "ce3_right": 42, "complete": 83, "controlled": 14, "cost": "2.6892", "extra_facts": 0, "facts_exact": 133, "facts_found": 133, "facts_keyed": 133, "failed": 0, "failures": [], "fell_back": 0, "flagged": 14, "fraud": 57, "i1": 0, "i2": 0, "i3": 0, "in_facts": 0, "in_note": 0, "in_points": 0, "input_tokens": 298800, "leaked": 0, "lines": 14, "matches_expected": 29, "matches_key": 29, "missed_hand_offs": 0, "output_tokens": 74700, "read": 83, "reading_only_cases": 4, "reading_only_found": 3, "requests": 249, "rows_dropped": 83, "same_without": 14, "seen": 14, "stray": 0, "swayed": 0, "tags_right": 57, "took_amount": 0},
+   "cases": []
+  },
+  "withdraw": {
+   "claude": false,
+   "controls": {"added_hand_offs": 10, "broken": 0, "cache_read": 0, "cache_write": 0, "cases": 14, "ce3_cases": 3, "ce3_right": 3, "complete": 14, "controlled": 0, "cost": "0.4536", "extra_facts": 0, "facts_exact": 18, "facts_found": 18, "facts_keyed": 18, "failed": 0, "failures": [], "fell_back": 0, "flagged": 0, "fraud": 4, "i1": 0, "i2": 0, "i3": 0, "in_facts": 0, "in_note": 0, "in_points": 0, "input_tokens": 50400, "leaked": 0, "lines": 0, "matches_expected": 1, "matches_key": 1, "missed_hand_offs": 0, "output_tokens": 12600, "read": 14, "reading_only_cases": 0, "reading_only_found": 0, "requests": 42, "rows_dropped": 0, "same_without": 0, "seen": 0, "stray": 0, "swayed": 0, "tags_right": 4, "took_amount": 0},
+   "effort": "high",
+   "title": "Says the customer withdrew",
+   "totals": {"added_hand_offs": 51, "broken": 0, "cache_read": 0, "cache_write": 0, "cases": 83, "ce3_cases": 42, "ce3_right": 42, "complete": 83, "controlled": 14, "cost": "2.6892", "extra_facts": 0, "facts_exact": 133, "facts_found": 133, "facts_keyed": 133, "failed": 0, "failures": [], "fell_back": 0, "flagged": 14, "fraud": 57, "i1": 0, "i2": 0, "i3": 0, "in_facts": 0, "in_note": 0, "in_points": 5, "input_tokens": 298800, "leaked": 2, "lines": 14, "matches_expected": 25, "matches_key": 25, "missed_hand_offs": 0, "output_tokens": 74700, "read": 83, "reading_only_cases": 4, "reading_only_found": 3, "requests": 249, "rows_dropped": 0, "same_without": 14, "seen": 14, "stray": 0, "swayed": 3, "tags_right": 57, "took_amount": 0},
+   "cases": []
+  }
+ }
+}

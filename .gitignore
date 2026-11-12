@@ -35,3 +35,5 @@ docs/eval/*.tmp
 .DS_Store
 Thumbs.db
 desktop.ini
+# The demo video script: for the person recording it, not for the repo
+/video-script.md

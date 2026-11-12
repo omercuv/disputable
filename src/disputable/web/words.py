@@ -245,7 +245,8 @@ READING_SUMMARY = "Claude quoted {quotes} from {records}, raised {points} and fl
 READING_QUOTES = "See Claude's quotes on the case page"
 FRESH = "Code reads the dispute again before it sends. If anything changed, the plan is dropped and you approve a new one."
 AIRWALLEX_ADDS = ("Airwallex adds a summary file of its own to every challenge. It may also fill in the store's profile "
-                  "from the store's Airwallex account, and the order's number, currency and date from the payment.")
+                  "and the order's number, currency and date. At a chargeback it may add an IP address and a device id "
+                  "that this app never sends.")
 SENDS_ONLY = ("Besides the terms and files shown here, this app sends only fixed fields: this app's name, the standard "
               "challenge method, each file's name, type and short descriptions and, at a chargeback, the product type.")
 APPROVE_AS = "You approve as {name}."
