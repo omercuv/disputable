@@ -137,7 +137,8 @@ PLANTED = {"token": TOKEN, "note": f"seen from 198.51.100.23\nand {MADE_UP_REAL_
 
 def test_there_are_spike_recordings_to_compare():
     assert len(RECORDINGS) > 50
-    assert not [path for path in RECORDINGS if path.name == "state.json" or "archive" in str(path)]
+    inside = [path.relative_to(ROOT).as_posix() for path in RECORDINGS]  # the folder above the project may say anything
+    assert not [path for path in inside if path.endswith("/state.json") or "archive" in path]
 
 
 def test_every_committed_recording_scrubs_as_the_spike_does(same_secrets, tmp_path):

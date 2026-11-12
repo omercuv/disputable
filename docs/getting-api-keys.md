@@ -1,11 +1,11 @@
 # Getting the API keys
 
-Disputable needs two sets of keys. Both go only in the `.env` file in the project folder. Never commit them, paste them into a chat, or show them in a video.
+The demo, the tests and `make eval` need no keys. Running live on the Airwallex sandbox needs the Airwallex keys, and letting Claude read needs a Claude key. Keys go only in the `.env` file in the project folder. Never commit them, paste them into a chat, or show them in a video.
 
 | Keys | Used for | Needed |
 |---|---|---|
-| Airwallex sandbox Client ID + API key | every call to the Airwallex sandbox | now |
-| Claude API key | the part that reads emails and records | from about Nov 5 |
+| Airwallex sandbox Client ID + API key | every call to the Airwallex sandbox | for any run on the sandbox |
+| Claude API key | the part that reads emails and records | only to let Claude read |
 
 ## 1. Airwallex sandbox keys
 
@@ -46,8 +46,8 @@ Disputable needs two sets of keys. Both go only in the `.env` file in the projec
 ## 2. Claude API key
 
 1. Sign in at https://platform.claude.com. Using the same email as your claude.ai account makes plan credits easier to link.
-2. Make sure the account has credits. Claude Pro doesn't include API credits. Max plans can link monthly API credits from claude.ai billing settings. You can also buy a small amount under **Settings > Billing**. For the hackathon's Claude credits, the organizers said guidance goes to shortlisted teams during the build phase. Check the shortlist email (and spam), or ask support@hackerearth.com.
-3. Open https://platform.claude.com/settings/keys and click **Create key**. Pick the Default Workspace and an expiry after Nov 19, 2026 (Demo Day). The expiry can't be changed later.
+2. Make sure the account has credits. Claude Pro doesn't include API credits. Max plans can link monthly API credits from claude.ai billing settings. You can also buy a small amount under **Settings > Billing**.
+3. Open https://platform.claude.com/settings/keys and click **Create key**. Pick the Default Workspace and an expiry. The expiry can't be changed later.
 4. Copy the key. It starts with `sk-ant-` and is shown only once. Put it in `.env` as `ANTHROPIC_API_KEY=...`.
 
 Sources (checked 2026-10-29): the hackathon builder guide (airwallexdev.com/guide); the Airwallex docs pages "Sandbox environment", "Sandbox settings" and "Manage API keys"; the Claude Console docs.

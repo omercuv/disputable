@@ -18,7 +18,7 @@ uv sync
 make demo
 ```
 
-No `make` (on Windows, say)? Run `uv run disputable demo`. On Windows, clone into a short folder, such as
+No `make` (on Windows, say)? Run `uv run disputable demo`. On Windows, clone or unzip into a short folder, such as
 `C:\disputable`: some files in the Claude SDK have long names, and Windows refuses a path over 260 characters unless
 long paths are on.
 
@@ -99,7 +99,7 @@ For each case code compares the expected cost of fighting with the cost of accep
 - **A retry reuses its request id.** Each response keeps a saved request id. If an answer is lost, the agent reads the
   dispute again and sends the same request, with the same id, only when the response doesn't show.
 - **One dispute per payment.** A second dispute on a payment sends every open case on it to a person, so the customer
-  isn't paid twice. One known gap is in [docs/limits.md](docs/limits.md).
+  isn't paid twice. One known gap is in [docs/limits.md](docs/limits.md#the-loop-payments-and-sending).
 - **Deadlines.** The queue warns when a response is due within 72 hours.
 - **Code writes the evidence.** Each PDF is built from the store's records with fixed wording, and the SHA-256 of its
   text is part of the approval. A person approves every file. Code never sends again a file the bank turned down.
@@ -185,7 +185,8 @@ key, a pass or a loop sends every case Claude would read to a person with code's
   Claude key, each needs a dollar cap such as `--cap 3` and asks once before Claude reads.
 - `uv run disputable serve --approver Priya` opens the pages over the live database, with approvals on.
 - Point these at a story run's data with `--data "<data>/story-<run>"`. Data lives in a per-user folder
-  (`%LOCALAPPDATA%\Disputable` on Windows), or where `DISPUTABLE_DATA` in `.env` says.
+  (`%LOCALAPPDATA%\Disputable` on Windows, `~/Library/Application Support/Disputable` on macOS and
+  `~/.local/share/disputable` on Linux), or where `DISPUTABLE_DATA` in `.env` says.
 - `uv run disputable bank preflight` checks, with three test payments, that the sandbox takes this app's exact
   requests.
 
@@ -218,6 +219,9 @@ The full list is in [docs/limits.md](docs/limits.md). These matter most:
 
 ## Changed since the idea
 
+The idea has two write-ups: [the short one](docs/idea/idea-submission.md) and
+[the detailed v2](docs/idea/idea-submission-v2-detailed.md).
+
 - The ear tips: the idea said that with a $15 fee even a win loses money. At RFI a win carries no $15 fee. The real
   reason is the $16 review, which costs more than the $12.30 accept.
 - The eval has 83 cases. The idea promised 24 or more.
@@ -246,4 +250,4 @@ The full list is in [docs/limits.md](docs/limits.md). These matter most:
 
 Keys live only in `.env`, which is never committed. Recordings keep no key, IP address or account id, and none of the
 checkout browser's own data (`device_data`): the recorder replaces them before it writes, and tests check every
-recording.
+recording. Recordings do keep the device id Airwallex adds to a challenge at a chargeback.

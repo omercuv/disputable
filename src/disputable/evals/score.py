@@ -46,7 +46,7 @@ MIN_INSIDE = 4  # one text inside the other counts when the shorter has at least
 # The three keys the pipeline can't reach by design: the outcome expected instead, and why, for the report.
 EXPLAINED: Mapping[str, tuple[tuple[Action, Action | None], str]] = MappingProxyType({
     "ce3_bank_reports_the_only_good_pair": (
-        (HAND_OFF, ACCEPT), "The bank's comment alone ends CE 3.0 here, so a person checks it before the accept (G1)."),
+        (HAND_OFF, ACCEPT), "The bank's comment alone ends CE 3.0 here, so a person checks it before the accept."),
     "ce3_package_has_no_file": ((CHALLENGE, None), "The key tests an engine gate. The app always builds the file."),
     "round_2_old_file_again": (
         (CHALLENGE, None), "The key tests an engine gate. The app never sends the file the bank turned down."),

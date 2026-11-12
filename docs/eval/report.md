@@ -1,7 +1,6 @@
 # How well Claude reads the cases
 
-This page is made by `disputable eval` from the readings kept in `fixtures/readings`. Making it again costs nothing: it
-calls no API.
+This page is made by `disputable eval`. Making it again costs nothing: it calls no API.
 
 Claude hasn't read any case yet. The columns below are the scripts' only.
 
@@ -53,7 +52,7 @@ wrong on purpose, and they score lower.
 
 | Case | The key | Expected instead | Why |
 |---|---|---|---|
-| ce3\_bank\_reports\_the\_only\_good\_pair | accept | a person (draft: accept) | The bank's comment alone ends CE 3.0 here, so a person checks it before the accept (G1). |
+| ce3\_bank\_reports\_the\_only\_good\_pair | accept | a person (draft: accept) | The bank's comment alone ends CE 3.0 here, so a person checks it before the accept. |
 | ce3\_package\_has\_no\_file | a person (draft: challenge) | challenge | The key tests an engine gate. The app always builds the file. |
 | round\_2\_old\_file\_again | a person (no draft) | challenge | The key tests an engine gate. The app never sends the file the bank turned down. |
 

@@ -115,8 +115,8 @@ def render(columns: Sequence[Column], *, kept: Sequence[Kept] = (), runs: Sequen
         raise ValueError("The report needs the perfect and the empty reader's columns.")
     full = totals(scripted["perfect"].cases)
     lines = ["# How well Claude reads the cases", ""]
-    lines += _wrap("This page is made by `disputable eval` from the readings kept in `fixtures/readings`. Making it again "
-                   "costs nothing: it calls no API.")
+    source = " from the readings kept in `fixtures/readings`" if kept else ""  # no folder until a run keeps one
+    lines += _wrap(f"This page is made by `disputable eval`{source}. Making it again costs nothing: it calls no API.")
     lines += ["", *_intro(claude, kept, full), ""]
     lines += _wrap("Two scripts set the scale. The perfect reader proposes exactly what the answer key says. The empty "
                    "reader proposes nothing, which is what code alone does. They are not Claude. The scripted readers "
